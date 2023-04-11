@@ -3,10 +3,10 @@
 
 - [ ] Cosmin Iulian Burlacu = Scrum Master
 - [ ] Edward Pini = Product Owner
-- [ ] Gabriel Panini = Developmnent Team
-- [ ] Vittorio de Simone = Developmnent Team
-- [ ] Giovanni Cocchi = Dvelopmnent Team
-- [ ] Francesco Caligiuri = Dvelopmnent Team
+- [ ] Gabriel Panini = Development Team
+- [ ] Vittorio de Simone = Development Team
+- [ ] Giovanni Cocchi = Development Team
+- [ ] Francesco Caligiuri = Development Team
 
 ## Ruoli Interni
 
