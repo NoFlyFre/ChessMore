@@ -1,0 +1,22 @@
+18 APRILE
+
+TEAM
+Cosmin Iulian Burlacu	SM
+Edward Pini	PO
+Gabriel Panini	T
+Vittorio de Simone	T
+Giovanni Cocchi	T
+Francesco Caligiuri	T
+
+
+Checklist: 
+Mattermost attivo ma poco usato
+Codice: ancora nulla
+US presenti e stimate, manca Sprint 1 backlog
+Scrumble: fatto, manca foglio excel
+IDE: ?
+Linguaggio/Framework: Python
+SRS: solo descrizione Use case
+Diagrammi: Use Case (Magari fate un file unico), ER, Architetturli 
+SQ: impostato
+
