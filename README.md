@@ -1,6 +1,5 @@
 # Scacchi Online
 ## statement
-
 *under construction*
 
 ----
