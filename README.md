@@ -1,9 +1,10 @@
 # Scacchi Online
-
 ## statement
 
 *under construction*
+
 ----
+
 ## Ruoli Scrum e Interni
 ### Ruoli Scrum
 
@@ -22,7 +23,9 @@
 - [ ] **Vittorio de Simone**= Back-end
 - [ ] **Giovanni Cocchi** = Back-end
 - [ ] **Francesco Caligiuri** = Front-end
+
 ----
+
 ### Email Universitarie
 
 - [ ] **Cosmin Iulian Burlacu** = [285623@studenti.unimore.it](mailto:285623@studenti.unimore.it) 
@@ -31,4 +34,3 @@
 - [ ] **Vittorio de Simone**= [282535@studenti.unimore.it](mailto:282535@studenti.unimore.it)
 - [ ] **Giovanni Cocchi** = [228001@studenti.unimore.it](mailto:228001@studenti.unimore.it)
 - [ ] **Francesco Caligiuri** = [276621@studenti.unimore.it](mailto:276621@studenti.unimore.it)
-
