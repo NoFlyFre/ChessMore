@@ -5,14 +5,20 @@
   text-align: center
 }
 
- th, td {
+ th {
   border:1px solid black;
-  background-color: white;
+  background-color: #F7D621;
+  color: #1E5393
 }
+ td{
+   border:1px solid black;
+   background-color: #1E5393;
+   color: #F7D621
+ }
 
 table{
-  border:2px solid black;
-  background-color: #FCD299;
+  background-color: #FFFFFF;
+  border:2px solid #F7D621;
   margin: auto;
   width: 60%;
   padding: 10px;
@@ -20,14 +26,17 @@ table{
 }
 
 body{
-  background-color: #123456;
+  background-color: #1E5393;
 }
 
-h1, h4{
-  color: #000000;
+h1, h4 {
+  color: #1E5393;
+}
+p{
+    color: #FFFFFF;
 }
 
 button{
-  background-color: #FCD299;
-  border:2px solid black;
+  background-color: #F7D621;
+  border:2px solid #F7D621;
 }
