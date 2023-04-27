@@ -32,14 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
-    'chessengine'
+    'chessengine',
 ]
 
 MIDDLEWARE = [
@@ -70,8 +70,8 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'chessmore.asgi.application'
 WSGI_APPLICATION = 'chessmore.wsgi.application'
-ASGI_APLLICATION = 'chessmore.asgi.application'
 
 
 # Database
@@ -128,7 +128,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CHANNEL_LAYERS = {
-"default": {
-"BACKEND": "channels.layers.InMemoryChannelLayer"
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    } 
 }
-}
+

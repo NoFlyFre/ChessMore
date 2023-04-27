@@ -19,28 +19,33 @@
 <script>
     function onDragStart (source, piece, position, orientation) {
     if (game.isGameOver() || (game.turn() === "w" && piece.search(/^b/) !== -1) ||
-        (game.turn() === "b" && piece.search(/^w/) !== -1)) {
+        (game.turn() === "b" && piece.search(/^w/) !== -1) || game.turn() != orientation[0]) {
         return false;
     }
     }
 
     function onDrop (source, target, piece, newPos, oldPos, orientation) {
-        let prom = null;
+        let prom = 'q';
         try{
-            game.move({from: source, to: target, promotion: 'q'});
+            game.move({from: source, to: target, promotion: prom});
+
             if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
-                let prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per"
+                prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per"
                 +" il cavallo, 'b' per l'alfiere e 'r' per la torre");
-                console.log(game.history());
                 game.undo();
                 game.move({from: source, to: target, promotion: prom});
-                console.log(game.history());
             }
+
+            send_move(source, target, prom);
+
             }
             catch (e){
                 return "snapback";
             }
-        
+    }
+    
+    function check_status () {
+        board.position(game.fen())
         if(game.isCheckmate()){
             let winner = "bianchi"
             if(game.turn() === 'w')
@@ -54,25 +59,52 @@
         else if(game.isDraw())
             alert("La partita è finita in pareggio!")
     }
-    
-    function onSnapEnd () {
-        board.position(game.fen())
-    }
        
     function pieceTheme (piece) {
         return "{% static '/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
     }
 
+    let orientation = 'white';
+
+    {% if order == 2 %}
+        orientation = 'black';
+    {% endif %}
+
     let config = {
+        orientation: orientation,
         draggable: true,
         pieceTheme: pieceTheme,
         position: 'start',
         onDragStart: onDragStart,
         onDrop: onDrop,
-        onSnapEnd: onSnapEnd
+        onSnapEnd: check_status
     };
 
     let game = new Chess();
     let board = ChessBoard('myBoard', config);
+
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + {{room_number}} + '/');
+
+    socket.onmessage = function(e){
+        const data = JSON.parse(e.data);
+        try{
+            game.move({from: data.move.slice(0,2), to: data.move.slice(2,4), promotion: data.move[4]});
+            check_status();
+            }
+            catch (e){
+                return "snapback";
+            }
+
+   };
+
+   function send_move(source, target, prom){
+    let obj = new Object();
+    obj.move = source + target + prom;
+    let string = JSON.stringify(obj);
+    socket.send(string);
+
+   }
+
+
 </script>
 {% endblock %}
