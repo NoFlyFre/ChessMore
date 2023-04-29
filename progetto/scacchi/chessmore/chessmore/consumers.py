@@ -23,14 +23,27 @@ class WSConsumerChess(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        move = text_data_json['move']
 
-        await self.channel_layer.group_send(
+        if(text_data_json['type'] == 'game_move'):
+            move = text_data_json['move']
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'game_move',
+                    'move': move,
+                    'sender_channel_name': self.channel_name,
+                }
+            )
+        else:
+            message = text_data_json['message']
+            username = text_data_json['username']
+            #room = text_data_json['room']
+            await self.channel_layer.group_send(
             self.room_group_name,
             {
-                'type': 'game_move',
-                'move': move,
-                'sender_channel_name': self.channel_name,
+                'type': 'chat_message',
+                'message': message,
+                'username': username
             }
         )
 
@@ -40,4 +53,16 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         if self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps({
                 'move': move,
+                'type': 'game_move'
             }))
+
+    async def chat_message(self, event):
+        message = event['message']
+        username = event['username']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message,
+            'username': username,
+            'type': 'messaggio'
+        }))

@@ -23,5 +23,5 @@ def classic_chess(request, room_number, name):
     elif name not in (game.player1, game.player2): #condizione per impedire che più di due giocatori si colleghino
         return HttpResponse("Ci sono già due giocatori che stanno giocando in questa stanza")
     
-    ctx = {"title" : "Classic chess", "order": order, "room_number": room_number}
+    ctx = {"title" : "Classic chess", "order": order, "room_number": room_number, 'username': name}
     return render(request, template_name="chessengine/classic_chess.html", context=ctx)
