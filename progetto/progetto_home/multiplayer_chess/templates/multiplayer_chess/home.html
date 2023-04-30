@@ -1,0 +1,98 @@
+{% extends 'multiplayer_chess/base.html' %}
+{% load static %}
+{% block title %}
+    <title>Home</title>
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'multiplayer_chess/bho.css' %}">
+{% endblock %}
+
+{% block navbar %}
+    {% include 'multiplayer_chess/navbar.html' %}
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        .container {
+            max-width: 1500px;
+        }
+    </style>
+
+    <div class="container my-3">
+        <!-- First row -->
+        <div class="row first-row">
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_classic.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi classici</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/anti_chess.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi vinciperdi</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_suicide.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi suicidio</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/atomic_chess.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi atomici</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Second row -->
+        <div class="row second-row">
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-3 mx-auto my-3 text-center">
+                <div class="card">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
