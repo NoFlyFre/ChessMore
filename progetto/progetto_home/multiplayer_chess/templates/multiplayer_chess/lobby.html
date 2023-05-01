@@ -1,0 +1,25 @@
+
+<h1>All Users</h1>
+<div id="server-message"></div>
+
+<script>
+
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/lobbyws/');
+    socket.addEventListener('open', function (event) {
+        console.log('WebSocket connection established.');
+    });
+
+    socket.addEventListener('message', function (event) {
+        let data = JSON.parse(event.data)
+        console.log("Message from server: ", data);
+        document.getElementById("server-message").textContent = data.message;
+
+        if (data['type'] === 'match_found') {
+            // redirect the user to another page
+            window.location.href = '/classic_chess/' + encodeURIComponent(data['message']);
+        }
+    });
+
+</script>
+
+

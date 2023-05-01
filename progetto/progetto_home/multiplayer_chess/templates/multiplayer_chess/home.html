@@ -4,10 +4,6 @@
     <title>Home</title>
 {% endblock %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'multiplayer_chess/bho.css' %}">
-{% endblock %}
-
 {% block navbar %}
     {% include 'multiplayer_chess/navbar.html' %}
 {% endblock %}
@@ -27,7 +23,7 @@
                 <div class="card">
                     <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_classic.jpg' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi classici</a>
+                        <a href="{% url 'multiplayer_chess:lobby' %}" class="btn primary_bg stretched-link">Gioca a scacchi classici</a>
                     </div>
                 </div>
             </div>

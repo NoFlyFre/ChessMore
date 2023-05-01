@@ -1,7 +1,9 @@
 .primary_bg {
-  background-color: #2b2b2b;
-  color: white;
-}
+    background-color: #2b2b2b;
+    color: white;
+  }
+
 .primary_bg:hover {
-  color: white;
+    color: white;
 }
+  

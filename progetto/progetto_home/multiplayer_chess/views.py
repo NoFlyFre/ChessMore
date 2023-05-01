@@ -3,8 +3,8 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from .forms import *
 from django.contrib.auth.decorators import login_required
-from .models import Profile
-
+from .models import *
+from django.http import HttpResponse
 
 # Create your views here.
 
@@ -86,3 +86,26 @@ def my_password_change_view(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
 
+
+
+@login_required(login_url='/login')
+def lobby(request):
+    return render(request, "multiplayer_chess/lobby.html")
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------
+
+@login_required(login_url='/login')
+def classic_chess(request, room_number):
+
+    games = Game.objects.filter(room_id=room_number)
+    game = games.first()
+    user = request.user
+    if game.player1 != user and game.player2 != user:
+        return HttpResponse("Non fai parte di questa stanza")
+
+    order = 1 if game.player1 == user else 2
+
+    ctx = {"title" : "Classic chess", "order": order, "room_number": room_number, 'username': user.username}
+    return render(request, template_name="multiplayer_chess/classic_chess.html", context=ctx)
+    
