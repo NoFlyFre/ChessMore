@@ -61,7 +61,7 @@ class Lobby(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        if Lobby.channel_counter != 2:
+        if Lobby.channel_counter == 1:
 
             if self.firstConnection:
                 await sync_to_async(self.my_sync_crea_partita)(user)
@@ -73,7 +73,9 @@ class Lobby(AsyncWebsocketConsumer):
                     "message": f"Hello, everyone! {usernames}",
                 }
             )       
-        else:
+
+        if Lobby.channel_counter == 2:
+
             room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user)
             await self.channel_layer.group_send(
                 "canali_lobby",
@@ -142,6 +144,13 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'connection_established',
+                }
+            )
     
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -195,3 +204,12 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             'username': username,
             'type': 'messaggio'
         }))
+
+    async def connection_established(self, event):
+        type = event["type"]
+        # Send the message to the WebSocket
+        await self.send(text_data=json.dumps({
+            "type": type,
+            "message": "connessione al socket avvenuta con successo",
+        }))
+

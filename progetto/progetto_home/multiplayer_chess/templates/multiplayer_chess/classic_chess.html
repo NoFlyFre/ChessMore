@@ -164,10 +164,15 @@
         }
    }
    function message_receive(data){
-    var div = document.createElement("div");
-        div.innerHTML = data.username + ": " + data.message; 
-        document.querySelector('#chat-message-container').appendChild(div); 
+
+        if (data.type === "connection_established") {
+            return;
+        }
+        var div = document.createElement("div");
+            div.innerHTML = data.username + ": " + data.message; 
+            document.querySelector('#chat-message-container').appendChild(div); 
    }
+
    function send_move(source, target, prom){
     let obj = new Object();
     obj.move = source + target + prom;
@@ -189,5 +194,6 @@
 
         messageInputDom.value = '';            
     }
+
 </script>
 {% endblock %}

@@ -5,6 +5,7 @@ from .forms import *
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.http import HttpResponse
+import time
 
 # Create your views here.
 
