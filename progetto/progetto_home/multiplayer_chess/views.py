@@ -107,6 +107,19 @@ def classic_chess(request, room_number):
 
     order = 1 if game.player1 == user else 2
 
-    ctx = {"title" : "Classic chess", "order": order, "room_number": room_number, 'username': user.username}
+    profiles = Profile.objects.filter(user_id=game.player1)
+    profile1 = profiles.first()
+    profiles = Profile.objects.filter(user_id=game.player2)
+    profile2 = profiles.first()
+
+    ctx = {
+        "title" : "Classic chess", 
+        "order": order, 
+        "room_number": room_number, 
+        'username': user.username,
+        'user_image': profile1.photo,
+        'username2': game.player2.username,
+        'user2_image': profile2.photo
+    }
     return render(request, template_name="multiplayer_chess/classic_chess.html", context=ctx)
     

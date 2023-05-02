@@ -66,6 +66,16 @@
                 </div>
             </div>
             <small class="has-text-grey-light">Your username: {{ username }}</small>
+            {% if user_image %}
+                <div>
+                    <img src="/media/{{ user_image }}" alt="{{ username }}'s Image">
+                </div>
+            {% endif %}
+            {% if user2_image %}
+                <div>
+                    <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image">
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -9,6 +9,7 @@ class Profile(models.Model):
         return f'Profile of {self.user.username}'
 
 #--------------------------------------------------------------------------------------------------------------------
+
 class Game(models.Model):
     player1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='game_as_player1', on_delete=models.CASCADE, null=True)
     player2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='game_as_player2', on_delete=models.CASCADE, null=True)
