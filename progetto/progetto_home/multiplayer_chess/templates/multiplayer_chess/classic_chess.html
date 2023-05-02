@@ -1,7 +1,10 @@
 {% extends 'multiplayer_chess/base_for_classic_chess.html' %}
 
-{%block head %} 
+{%block head %}
 <style>
+  p{
+    color: black;
+  }
     .wrapper{
         width: 90%;
         margin: auto;
@@ -25,6 +28,10 @@
         display: table;
         clear: both;
     }
+    .input{
+        color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
+    }
+
 </style>
 
 {% load static %}
@@ -52,20 +59,20 @@
     <div class="column right">
         <div class="container">
             <div class="box">
-                <div id="chat-message-container">
+                <div id="chat-message-container" class="container">
                 </div>
             </div>
             <div class="field">
                 <div class="control">
                     <input class="input" type="text" placeholder="Message" id="chat-message-input">
                 </div>
-            </div>  
+            </div>
             <div class="field">
                 <div class="control">
                     <input id="chat-message-submit" type="button" value="Invia">
                 </div>
             </div>
-            <small class="has-text-grey-light">Your username: {{ username }}</small>
+            <small class="has-text-black">Your username: {{ username }}</small>
             {% if user_image %}
                 <div>
                     <img src="/media/{{ user_image }}" alt="{{ username }}'s Image">
@@ -109,7 +116,7 @@
                 return "snapback";
             }
     }
-    
+
     function check_status () {
         board.position(game.fen())
         if(game.isCheckmate()){
@@ -125,7 +132,7 @@
         else if(game.isDraw())
             alert("La partita è finita in pareggio!")
     }
-       
+
     function pieceTheme (piece) {
         return "{% static '/multiplayer_chess/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
     }
@@ -161,7 +168,7 @@
         else {
             message_receive(data);
         }
-            
+
    };
 
    function game_receive(data){
@@ -179,8 +186,8 @@
             return;
         }
         var div = document.createElement("div");
-            div.innerHTML = data.username + ": " + data.message; 
-            document.querySelector('#chat-message-container').appendChild(div); 
+            div.innerHTML = data.username + ": " + data.message;
+            document.querySelector('#chat-message-container').appendChild(div);
    }
 
    function send_move(source, target, prom){
@@ -202,7 +209,7 @@
             'username': userName
         }));
 
-        messageInputDom.value = '';            
+        messageInputDom.value = '';
     }
 
 </script>

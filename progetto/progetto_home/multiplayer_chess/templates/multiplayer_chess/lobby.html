@@ -1,9 +1,61 @@
+{% extends 'multiplayer_chess/base.html' %}
+{% load static %}
 
-<h1>All Users</h1>
-<div id="server-message"></div>
+{% block navbar %}
+    {% include 'multiplayer_chess/navbar.html' %}
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        .container {
+            background-color: #949494;
+            background-image: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
+            border-radius: 20px; /* adjust the value to your preference */
+        }
+
+        h1, label, legend, input[type="text"], textarea {
+            color: black; /* or any other color value that you prefer */
+        }
+
+        .btn-outline-info {
+            color: black;
+            border-color: black;
+        }
+
+        .loader {
+          position: relative;
+          top: -30px;
+          left: 175px;
+          width: 75px;
+          height: 75px;
+          display: flex;
+          align-items: center;
+          background-color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
+          transition: opacity 0.75s, visibility 0.75s;
+        }
+
+        .loader::after{
+          content: "";
+          width: 75px;
+          height: 75px;
+          border: 15px solid black;
+          border-top-color: #123456;
+          border-radius: 50%;
+          animation: loading 0.75s ease infinite;
+        }
+
+        @keyframes loading {
+          from{
+            transform: rotate(0turn);
+          }
+          to{
+            transform: rotate(1turn);
+          }
+        }
+    </style>
 
 <script>
-
     const socket = new WebSocket('ws://' + window.location.host + '/ws/lobbyws/');
     socket.addEventListener('open', function (event) {
         console.log('WebSocket connection established.');
@@ -19,7 +71,14 @@
             window.location.href = '/classic_chess/' + encodeURIComponent(data['message']);
         }
     });
-
 </script>
 
-
+<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 700px;">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="text-center mb-5 mt-3" align="center">Ricerca Avversario in corso...</h2>
+            <div class="loader"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
