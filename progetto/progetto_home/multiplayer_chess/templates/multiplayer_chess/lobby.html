@@ -63,9 +63,7 @@
 
     socket.addEventListener('message', function (event) {
         let data = JSON.parse(event.data)
-        console.log("Message from server: ", data);
-        document.getElementById("server-message").textContent = data.message;
-
+        
         if (data['type'] === 'match_found') {
             // redirect the user to another page
             window.location.href = '/classic_chess/' + encodeURIComponent(data['message']);
