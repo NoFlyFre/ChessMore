@@ -2,14 +2,15 @@
 
 {%block head %}
 <style>
-  .has-text-black{
-    text-align: center;
-  }
   .icona_utente {
+    length: 150px;
     width: 150px;
+    left: 50px;
   }
   p{
     color: black;
+    topo:0;
+
   }
     .wrapper{
         width: 90%;
@@ -59,28 +60,20 @@
     <div class="column middle">
       <div >
         <div>
-      {% if user_image %}
-        <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="icona_utente">
-      {% endif %}
+          <p> {{ username2 }}</p>
+            {% if user_image %}
+            <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="icona_utente">
+            {% endif %}
       </div>
     </div>
         <div class="container">
-          {% if username  != username2 %}
-          <p class="has-text-black"> {{ username2 }}</p>
-          {% else %}
-            <p class="has-text-black"> {{ username }}</p>
-          {% endif %}
             <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
-            {% if username != username2 %}
-            <p class="has-text-black"> {{ username }}</p>
-            {% else %}
-            <p class="has-text-black"> {{ username2 }}</p>
-            {% endif %}
         </div>
-          <div>
+        <div>
             {% if user2_image %}
             <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="icona_utente">
-        {% endif %}
+            {% endif %}
+        <p> {{ username }}</p>
         </div>
     </div>
     <div class="column right">

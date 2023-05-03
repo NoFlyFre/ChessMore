@@ -60,7 +60,7 @@ def home(request):
 @login_required(login_url='/login')
 def edit(request):
     if request.method == 'POST':
-        user_form = UserEditForm(instance=request.user, data=request.POST) 
+        user_form = UserEditForm(instance=request.user, data=request.POST)
         profile_form = ProfileEditForm(instance=request.user.profile, data=request.POST, files=request.FILES)
         try:
             user_form.save()
@@ -107,19 +107,27 @@ def classic_chess(request, room_number):
 
     order = 1 if game.player1 == user else 2
 
-    profiles = Profile.objects.filter(user_id=game.player1)
-    profile1 = profiles.first()
-    profiles = Profile.objects.filter(user_id=game.player2)
-    profile2 = profiles.first()
+    profiles1 = Profile.objects.filter(user_id=game.player1)
+    profiles2 = Profile.objects.filter(user_id=game.player2)
+    if order == 1:
+        profile1 = profiles1.first()
+        username1 = game.player1.username
+        profile2 = profiles2.first()
+        username2 = game.player2.username
+    else:
+        profile1 = profiles2.first()
+        username1 = game.player2.username
+        profile2 = profiles1.first()
+        username2 = game.player1.username
+
 
     ctx = {
-        "title" : "Classic chess", 
-        "order": order, 
-        "room_number": room_number, 
-        'username': user.username,
+        "title" : "Classic chess",
+        "order": order,
+        "room_number": room_number,
+        'username': username1,
         'user_image': profile1.photo,
-        'username2': game.player2.username,
+        'username2': username2,
         'user2_image': profile2.photo
     }
     return render(request, template_name="multiplayer_chess/classic_chess.html", context=ctx)
-    
