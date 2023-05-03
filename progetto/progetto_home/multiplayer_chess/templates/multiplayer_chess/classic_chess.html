@@ -2,6 +2,12 @@
 
 {%block head %}
 <style>
+  .has-text-black{
+    text-align: center;
+  }
+  .icona_utente {
+    width: 150px;
+  }
   p{
     color: black;
   }
@@ -31,7 +37,6 @@
     .input{
         color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
     }
-
 </style>
 
 {% load static %}
@@ -52,8 +57,30 @@
         <p>Cronologia...</p>
     </div>
     <div class="column middle">
+      <div >
+        <div>
+      {% if user_image %}
+        <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="icona_utente">
+      {% endif %}
+      </div>
+    </div>
         <div class="container">
+          {% if username  != username2 %}
+          <p class="has-text-black"> {{ username2 }}</p>
+          {% else %}
+            <p class="has-text-black"> {{ username }}</p>
+          {% endif %}
             <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
+            {% if username != username2 %}
+            <p class="has-text-black"> {{ username }}</p>
+            {% else %}
+            <p class="has-text-black"> {{ username2 }}</p>
+            {% endif %}
+        </div>
+          <div>
+            {% if user2_image %}
+            <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="icona_utente">
+        {% endif %}
         </div>
     </div>
     <div class="column right">
@@ -72,17 +99,6 @@
                     <input id="chat-message-submit" type="button" value="Invia">
                 </div>
             </div>
-            <small class="has-text-black">Your username: {{ username }}</small>
-            {% if user_image %}
-                <div>
-                    <img src="/media/{{ user_image }}" alt="{{ username }}'s Image">
-                </div>
-            {% endif %}
-            {% if user2_image %}
-                <div>
-                    <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image">
-                </div>
-            {% endif %}
         </div>
     </div>
 </div>
