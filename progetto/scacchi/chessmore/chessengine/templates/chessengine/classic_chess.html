@@ -42,12 +42,32 @@
 {% block content %}
 <div class="row">
     <div class="column left">
-        <p>Cronologia...</p>
+      <div class="cronologia">
+        <h1>Cronologia</h1>
+        <div
+          id="history"
+          style="
+            width: 100px;
+            margin-left: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            height: 54vh;
+            width: 100%;
+            background-color: #fefae0;
+            overflow-y: scroll;
+            border: 1px solid black;
+            border-radius: 10px;
+          "
+        ></div>
+      </div>
     </div>
     <div class="column middle">
-        <div class="container">
-            <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
-        </div>
+      <div class="container">
+        <div
+          id="myBoard"
+          style="width: 500px; margin-left: auto; margin-right: auto"
+        ></div>
+      </div>
     </div>
     <div class="column right">
         <div class="container">
@@ -91,7 +111,7 @@
                 game.undo();
                 game.move({from: source, to: target, promotion: prom});
             }
-
+            console.log(game.history());
             send_move(source, target, prom);
 
             }
@@ -101,7 +121,8 @@
     }
     
     function check_status () {
-        board.position(game.fen())
+        board.position(game.fen());
+        store_move(game);
         if(game.isCheckmate()){
             let winner = "bianchi"
             if(game.turn() === 'w')
@@ -163,11 +184,13 @@
             return "snapback";
         }
    }
+
    function message_receive(data){
     var div = document.createElement("div");
         div.innerHTML = data.username + ": " + data.message; 
         document.querySelector('#chat-message-container').appendChild(div); 
    }
+
    function send_move(source, target, prom){
     let obj = new Object();
     obj.move = source + target + prom;
@@ -175,6 +198,13 @@
     let string = JSON.stringify(obj);
     socket.send(string);
    }
+
+   function store_move(game) {
+    var div = document.createElement("div");
+    var moves = game.history({verbose: true});
+    div.innerHTML = moves.length + " ." + moves[moves.length - 1].san;
+    document.querySelector('#history').appendChild(div);
+  }
 
    document.querySelector('#chat-message-submit').onclick = function(e){
         const messageInputDom = document.querySelector('#chat-message-input');
