@@ -2,17 +2,7 @@
 
 {%block head %}
 <style>
-  .icona_utente {
-    length: 150px;
-    width: 150px;
-    left: 50px;
-  }
-  p{
-    color: black;
-    topo:0;
-
-  }
-    .wrapper{
+  .wrapper{
         width: 90%;
         margin: auto;
         height: auto;
@@ -55,29 +45,31 @@
 {% block content %}
 <div class="row">
     <div class="column left">
-        <p>Cronologia...</p>
+        <p class="fs-3" style="color: black">Cronologia...</p>
     </div>
     <div class="column middle">
-      <div >
-        <div>
-          <p> {{ username2 }}</p>
-            {% if user_image %}
-            <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="icona_utente">
-            {% endif %}
+      <div class="float-start ms-4 mb-1">
+        {% if user_image %}
+        <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="img-thumbnail" style="width: 150px;  height: 150px;">
+        {% endif %}
       </div>
-    </div>
-        <div class="container">
-            <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
+      <div>
+        <p class="fs-3 float-start ms-3" style="color: black"> {{ username2 }}</p>
+      </div>
+      <div class="container float-end">
+          <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
+      </div>
+      <div class="float-start ms-4 mt-1">
+          {% if user2_image %}
+          <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail" style="width: 150px;  height: 150px;">
+          {% endif %}
         </div>
         <div>
-            {% if user2_image %}
-            <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="icona_utente">
-            {% endif %}
-        <p> {{ username }}</p>
+          <p class="fs-3 float-start ms-3" style="color: black"> {{ username }}</p>
         </div>
     </div>
     <div class="column right">
-        <div class="container">
+        <div class="container d-grid gap-2 col-6 mx-auto">
             <div class="box">
                 <div id="chat-message-container" class="container">
                 </div>
@@ -89,9 +81,10 @@
             </div>
             <div class="field">
                 <div class="control">
-                    <input id="chat-message-submit" type="button" value="Invia">
+                    <input id="chat-message-submit" type="button" value="Invia" class="btn btn-success">
                 </div>
             </div>
+            <button type="button" class="btn btn-danger btn-lg " name="abbandono_partita">Abbandona la partita</button>
         </div>
     </div>
 </div>
