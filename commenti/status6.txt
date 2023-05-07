@@ -1,4 +1,4 @@
-18 APRILE
+7 MAGGIO
 
 TEAM
 Cosmin Iulian Burlacu	SM
@@ -10,13 +10,16 @@ Francesco Caligiuri	T
 
 
 Checklist: 
-Mattermost attivo ma poco usato
-Codice: ancora nulla
-US presenti e stimate, manca Sprint 1 backlog
-Scrumble: fatto, manca foglio excel
+Taiga in uso, sembra aggiornato. Solo 2 persone però fanno modifiche...come mai?
+Mattermost attivo ma inutilizzato (l'ultimo messaggio è mio e del 30 aprile). I casi sono due: o non comunicate tra voi (cosa molto brutta), oppure comunicate con un altro canale (es: Telegram). Nel secondo caso, eliminare Mattermost e indicate il canale che davvero usate per comunicare
+Codice: presente (per qualche motivo non viene incluso nelle statistiche, controllerò)
+US presenti e stimate, manca Sprint 1 backlog iniziale e finale; dello sprint 2 manca tutto, incluso DoD,DoR e Goal. E lo status iniziale e finale
+Scrumble:OK
 IDE: ?
-Linguaggio/Framework: Python
+Linguaggio/Framework: Python/Django
 SRS: solo descrizione Use case
-Diagrammi: Use Case (Magari fate un file unico), ER, Architetturli 
+Diagrammi: Use Case (Magari fate un file unico, controllare la sintassi es: ci sono casi d'uso "fuori dal sistema", ), ER, Architetturli 
 SQ: impostato
+Test/Coverage: ?
+
 
