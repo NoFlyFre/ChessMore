@@ -33,7 +33,6 @@
 <script>var exports = {};</script>
 <script src="{% static '/jquery-3.6.4.min.js' %}"></script>
 <script src="{% static '/chessboardjs-1.0.0/js/chessboard-1.0.0.min.js' %}"></script>
-<script src="{% static 'chesslogic/chess.js' %}"></script>
 
 {% endblock %}
 
@@ -94,47 +93,36 @@
 
 <script>
     function onDragStart (source, piece, position, orientation) {
-    if (game.isGameOver() || (game.turn() === "w" && piece.search(/^b/) !== -1) ||
-        (game.turn() === "b" && piece.search(/^w/) !== -1) || game.turn() != orientation[0]) {
+    if (game_status || (turn === "w" && piece.search(/^b/) !== -1) ||
+        (turn === "b" && piece.search(/^w/) !== -1) || turn != orientation[0]) {
         return false;
     }
     }
 
     function onDrop (source, target, piece, newPos, oldPos, orientation) {
-        let prom = 'q';
-        try{
-            game.move({from: source, to: target, promotion: prom});
-
-            if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
-                prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per"
-                +" il cavallo, 'b' per l'alfiere e 'r' per la torre");
-                game.undo();
-                game.move({from: source, to: target, promotion: prom});
-            }
-            console.log(game.history());
-            send_move(source, target, prom);
-
-            }
-            catch (e){
-                return "snapback";
-            }
+        if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
+            prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per"
+            +" il cavallo, 'b' per l'alfiere e 'r' per la torre");
+            send_move(source, target, prom)
+        }
+        send_move(source, target, "");
     }
     
-    function check_status () {
-        board.position(game.fen());
-        store_move(game);
-        if(game.isCheckmate()){
+    function check_status (fen) {
+        board.position(fen);
+
+        if(game_status == "checkmate"){
             let winner = "bianchi"
-            if(game.turn() === 'w')
+            if(turn === 'w')
                 winner = "neri"
             alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner)
         }
 
-        else if(game.isStalemate())
+        else if(game_status == "stalemate")
             alert("La partita è finita in pareggio per stallo!")
 
-        else if(game.isDraw())
-            alert("La partita è finita in pareggio!")
+        else if(game_status == "insufficient")
+            alert("La partita è finita in pareggio per posizione morta!")
     }
        
     function pieceTheme (piece) {
@@ -157,8 +145,10 @@
         onSnapEnd: check_status
     };
 
-    let game = new Chess();
     let board = ChessBoard('myBoard', config);
+    let game_status = "";
+    let turn = "w";
+    let count = 1;
 
     const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + {{room_number}} + '/');
 
@@ -176,13 +166,10 @@
    };
 
    function game_receive(data){
-    try{
-        game.move({from: data.move.slice(0,2), to: data.move.slice(2,4), promotion: data.move[4]});
-        check_status();
-        }
-        catch (e){
-            return "snapback";
-        }
+    game_status = data.status;
+    turn = data.turn;
+    check_status(data.fen);
+    store_move(data.last_move, data.result);
    }
 
    function message_receive(data){
@@ -199,11 +186,13 @@
     socket.send(string);
    }
 
-   function store_move(game) {
-    var div = document.createElement("div");
-    var moves = game.history({verbose: true});
-    div.innerHTML = moves.length + " ." + moves[moves.length - 1].san;
-    document.querySelector('#history').appendChild(div);
+   function store_move(move, result) {
+    if(result == 'success'){
+        var div = document.createElement("div");
+        div.innerHTML = count + " ." + move;
+        document.querySelector('#history').appendChild(div);
+        count ++;
+    }
   }
 
    document.querySelector('#chat-message-submit').onclick = function(e){
