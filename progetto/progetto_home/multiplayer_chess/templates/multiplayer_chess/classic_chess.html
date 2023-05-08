@@ -2,6 +2,20 @@
 
 {%block head %}
 <style>
+  .input::placeholder{
+    color: #3e3e3e !important;
+    opacity: 1;
+  }
+  ::-moz-placeholder{
+    color: white;
+    opacity: 1;
+  }
+  .img-thumbnail{
+    width: 150px;
+    height: 150px;
+    background-color: black;
+    border-color: #3e3e3e;
+  }
   .wrapper{
         width: 90%;
         margin: auto;
@@ -50,7 +64,7 @@
     <div class="column middle">
       <div class="float-start ms-4 mb-1">
         {% if user_image %}
-        <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="img-thumbnail" style="width: 150px;  height: 150px;">
+        <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="img-thumbnail">
         {% endif %}
       </div>
       <div>
@@ -61,7 +75,7 @@
       </div>
       <div class="float-start ms-4 mt-1">
           {% if user2_image %}
-          <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail" style="width: 150px;  height: 150px;">
+          <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail">
           {% endif %}
         </div>
         <div>
@@ -70,13 +84,13 @@
     </div>
     <div class="column right">
         <div class="container d-grid gap-2 col-6 mx-auto">
-            <div class="box">
+            <div class="box bg-dark text-light">
                 <div id="chat-message-container" class="container">
                 </div>
             </div>
             <div class="field">
                 <div class="control">
-                    <input class="input" type="text" placeholder="Message" id="chat-message-input">
+                    <input class="input bg-dark border-dark text-light " type="text" placeholder="Message" id="chat-message-input">
                 </div>
             </div>
             <div class="field">
@@ -84,11 +98,10 @@
                     <input id="chat-message-submit" type="button" value="Invia" class="btn btn-success">
                 </div>
             </div>
-            <button type="button" class="btn btn-danger btn-lg " name="abbandono_partita">Abbandona la partita</button>
+            <button type="button" class="btn btn-danger btn-lg mt-5">Abbandona la partita</button>
         </div>
     </div>
 </div>
-
 {{ username|json_script:"username" }}
 
 <script>
