@@ -6,8 +6,9 @@ class WSConsumerChess(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.variant = self.scope['url_route']['kwargs']['variant']
         self.room_group_name = 'game_' + self.room_name
-        game_logic.new_game(self.room_name)
+        game_logic.new_game(self.room_name, self.variant)
 
         await self.channel_layer.group_add(
             self.room_group_name,

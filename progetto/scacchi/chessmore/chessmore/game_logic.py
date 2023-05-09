@@ -1,8 +1,12 @@
 import chess
+import chess.variant
 
 games = {}
-def new_game(id):
-    games[id] = chess.Board()
+def new_game(id, variant):
+    if variant == "atomic_chess":
+        games[id] = chess.variant.AtomicBoard()
+    else:
+        games[id] = chess.Board()
 
 def insert_move(id, move):
     try:
@@ -21,6 +25,10 @@ def status(id):
         return "stalemate"
     elif games[id].is_insufficient_material():
         return "insufficient"
+    elif games[id].is_variant_draw():
+        return "var_draw"
+    elif games[id].is_variant_loss():
+        return "var_loss"
 
 def turn(id):
     if games[id].turn:

@@ -2,6 +2,15 @@
 
 {%block head %} 
 <style>
+    .move{
+        display: flex;
+    }
+    
+    .move .intern_div{
+        padding-left: 10px;
+        width: 70px;
+    }
+
     .wrapper{
         width: 90%;
         margin: auto;
@@ -111,18 +120,34 @@
     function check_status (fen) {
         board.position(fen);
 
-        if(game_status == "checkmate"){
-            let winner = "bianchi"
+        switch(game_status){
+            
+            case "checkmate":
+            let winner = "bianchi";
             if(turn === 'w')
-                winner = "neri"
-            alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner)
-        }
+                winner = "neri";
+            alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+            break;
 
-        else if(game_status == "stalemate")
+            case "stalemate":
             alert("La partita è finita in pareggio per stallo!")
+            break;
 
-        else if(game_status == "insufficient")
+            case "insufficient":
             alert("La partita è finita in pareggio per posizione morta!")
+            break;
+
+            case "var_draw":
+            alert("La partita è finita in pareggio per una regola della variante!")
+            break;
+
+            case "var_loss":
+            let winner2 = "bianchi"
+            if(turn === 'w')
+                winner2 = "neri"
+            alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2)
+            break;
+        }
     }
        
     function pieceTheme (piece) {
@@ -149,8 +174,10 @@
     let game_status = "";
     let turn = "w";
     let count = 1;
+    let create_div = true;
 
-    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + {{room_number}} + '/');
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + "{{room_number}}" + "/" + "{{variant}}" + "/");
+    console.log(socket)
 
     socket.onmessage = function(e){
         const data = JSON.parse(e.data);
@@ -188,10 +215,27 @@
 
    function store_move(move, result) {
     if(result == 'success'){
+        if(create_div){
         var div = document.createElement("div");
-        div.innerHTML = count + " ." + move;
+        div.setAttribute('class','move')
+        div.setAttribute('id', 'move' + count);
+        div.innerHTML = count + ". ";
+        var intern_div = document.createElement("div");
+        intern_div.setAttribute('class','intern_div')
+        intern_div.innerHTML = move;
         document.querySelector('#history').appendChild(div);
-        count ++;
+        document.querySelector('#move' + count).appendChild(intern_div);
+        create_div = false;
+        }
+        else{
+            var intern_div = document.createElement("div");
+            intern_div.setAttribute('class','intern_div')
+            var div = document.querySelector('#move' + count);
+            intern_div.innerHTML = move;
+            div.appendChild(intern_div);
+            create_div = true;
+            count ++;
+        }
     }
   }
 

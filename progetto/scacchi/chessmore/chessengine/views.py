@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import Game
 from django.http import HttpResponse
 
-def classic_chess(request, room_number, name):
+def chess_game(request, room_number, name, variant):
     games = Game.objects.filter(room_id=room_number)
     game = games.first()
     order = 1
@@ -23,5 +23,5 @@ def classic_chess(request, room_number, name):
     elif name not in (game.player1, game.player2): #condizione per impedire che più di due giocatori si colleghino
         return HttpResponse("Ci sono già due giocatori che stanno giocando in questa stanza")
     
-    ctx = {"title" : "Classic chess", "order": order, "room_number": room_number, 'username': name}
-    return render(request, template_name="chessengine/classic_chess.html", context=ctx)
+    ctx = {"title" : "Partita scacchi", "order": order, "room_number": room_number, "username": name, "variant": variant}
+    return render(request, template_name="chessengine/chess_game.html", context=ctx)
