@@ -56,6 +56,34 @@
     .input{
         color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
     }
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two columns with equal width */
+    }
+      
+    .column-1 {
+        background-color: #ccc;
+    }
+      
+    .column-2 {
+        background-color: #eee;
+    }
+
+    #move-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two columns with equal width */
+    }
+      
+    #move-container p {
+        background-color: #ccc;
+        margin: 0;
+        padding: 10px;
+    }
+      
+    #move-container span {
+        color: white;
+    }
+    
 </style>
 
 {% load static %}
@@ -71,26 +99,7 @@
 {% block content %}
 <div class="row">
     <div class="column left">
-        
-        <div class="cronologia">
-            <h1>Cronologia</h1>
-            <div
-              id="history"
-              style="
-                width: 50px;
-                margin-left: 10px;
-                margin-top: 10px;
-                padding: 10px;
-                height: 54vh;
-                width: 30%;
-                background-color: #fefae0;
-                overflow-y: scroll;
-                border: 1px solid black;
-                border-radius: 10px;
-              "
-            ></div>
-          </div>
-    
+        <div id="move-container"></div>
     </div>
     <div class="column middle">
       <div class="float-start ms-4 mb-1">
@@ -133,6 +142,10 @@
         </div>
     </div>
 </div>
+
+
+
+
 {{ username|json_script:"username" }}
 
 
@@ -248,13 +261,12 @@
     }
 
     function message_receive(data){
-
-            if (data.type === "connection_established") {
-                return;
-            }
-            var div = document.createElement("div");
-                div.innerHTML = data.username + ": " + data.message;
-                document.querySelector('#chat-message-container').appendChild(div);
+        if (data.type === "connection_established") {
+            return;
+        }
+        var div = document.createElement("div");
+        div.innerHTML = data.username + ": " + data.message;
+        document.querySelector('#chat-message-container').appendChild(div);
     }
 
     function send_move(source, target, prom){
@@ -266,28 +278,16 @@
     }
 
     function store_move(move, result) {
-        if(result == 'success'){
-            var div = document.createElement("div");
-            div.setAttribute('class','move')
-            div.setAttribute('id', 'move' + count);
-            div.innerHTML = count + ". ";
-            var intern_div = document.createElement("div");
-            intern_div.setAttribute('class','intern_div')
-            intern_div.innerHTML = move;
-            document.querySelector('#history').appendChild(div);
-            document.querySelector('#move' + count).appendChild(intern_div);
-            create_div = false;
+        if (result == 'success') {
+            const moveContainer = document.getElementById('move-container');
+            const moveElement = document.createElement('p');
+            const moveText = document.createTextNode(move);
+            const moveSpan = document.createElement('span');
+            moveSpan.appendChild(moveText);
+            moveElement.appendChild(moveSpan);
+            moveElement.classList.add('bg-dark'); 
+            moveContainer.appendChild(moveElement);
         }
-        else {
-            var intern_div = document.createElement("div");
-            intern_div.setAttribute('class','intern_div')
-            var div = document.querySelector('#move' + count);
-            intern_div.innerHTML = move;
-            div.appendChild(intern_div);
-            create_div = true;
-            count ++;
-        }
-
     }
 
     document.querySelector('#chat-message-submit').onclick = function(e){
