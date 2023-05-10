@@ -59,14 +59,15 @@ class Lobby(AsyncWebsocketConsumer):
         user = self.scope['user']
         self.mode = self.scope['url_route']['kwargs']['mode']
         self.room_group_name = 'canali_lobby_' + self.mode
+        print(self.room_group_name)
 
-        print(f'debugging: mode = {self.mode}')
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
         users_right_now = [t[0] for t in self.connected_users if t[1] == self.mode]
+        
         if user not in users_right_now:
             Lobby.channel_counter[self.mode] += 1
             self.firstConnection[self.mode] = True
@@ -76,9 +77,21 @@ class Lobby(AsyncWebsocketConsumer):
         self.connected_users.append((user, self.mode))
         usernames = self.return_usernames()
 
+        #debugging
+        users_right_now2 = [t[0] for t in self.connected_users if t[1] == self.mode]
+        utenti_username_lista = []
+        for i in  users_right_now2:
+            print(i.username)
+            utenti_username_lista.append(i.username)
+        print (utenti_username_lista)
+        my_list = list(set(utenti_username_lista))
+        print(my_list)
+        #debugging
+
+
         await self.accept()
 
-        if Lobby.channel_counter[self.mode] == 1:
+        if len(my_list) == 1:
 
             if self.firstConnection[self.mode]:
                 await sync_to_async(self.my_sync_crea_partita)(user, self.mode)
@@ -93,7 +106,7 @@ class Lobby(AsyncWebsocketConsumer):
 
         print(Lobby.channel_counter [self.mode])
 
-        if Lobby.channel_counter [self.mode] == 2:
+        if len(my_list) == 2:
 
             room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user, self.mode)
             await self.channel_layer.group_send(
@@ -104,6 +117,8 @@ class Lobby(AsyncWebsocketConsumer):
                     "mode": f"{self.mode}"
                 }
             )
+
+        print("fine")
     
 
 
@@ -115,7 +130,10 @@ class Lobby(AsyncWebsocketConsumer):
         
         self.room_group_name = 'canali_lobby_' + self.mode
         
-        if self.connected_users[0].count(user) == 1:
+
+       
+        
+        if self.connected_users.count((user, self.mode)) == 1:
             Lobby.channel_counter [self.mode] -= 1
             self.lastConnection[self.mode] = True
         else:
