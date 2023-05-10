@@ -5,8 +5,10 @@ name = "pypi"
 
 [packages]
 django = "*"
-chess = "*"
 channels = "*"
+daphne = "*"
+channels-redis = "*"
+pillow = "*"
 
 [dev-packages]
 

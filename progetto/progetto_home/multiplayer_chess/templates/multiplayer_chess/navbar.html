@@ -1,0 +1,60 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+  <div class="container-fluid">
+      <a class="navbar-brand mb-1">&#9823; Chess</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+          <ul class="navbar-nav me-auto">
+              <li class="nav-item active">
+                  <a class="nav-link" href="{% url 'multiplayer_chess:home' %}">Gioca partita</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="#">Cronologia</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="#">Tornei</a>
+              </li>
+          </ul>
+      </div>
+      <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <!-- User profile image -->
+            <span class="navbar-text">
+              {% if request.user.profile.photo %}
+                <img src="{{ request.user.profile.photo.url }}" alt="User profile" class="rounded-circle mt-1 me-2" style="width: 32px; height: 32px;">
+              {% else %}
+                <img src="{% static 'multiplayer_chess/images/user.jpg' %}" alt="Default Image" class="rounded-circle mt-1 me-2" style="width: 32px; height: 32px;">
+              {% endif %}
+            </span>
+          </li>
+          
+          
+          <style>
+            .dropdown-menu {
+              width: 135px !important;
+              min-width: 135px !important;
+            }
+          </style>
+          
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {{ request.user }}
+            </a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'multiplayer_chess:password_change' %}">Edit Password</a>
+              <a class="dropdown-item" href="{% url 'multiplayer_chess:edit' %}">Edit Profile</a>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="{% url 'multiplayer_chess:logout' %}">logout</a>
+          </li>
+
+        </ul>
+      </div>
+  </div>
+</nav>
