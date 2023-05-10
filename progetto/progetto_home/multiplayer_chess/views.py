@@ -90,14 +90,14 @@ def my_password_change_view(request):
 
 
 @login_required(login_url='/login')
-def lobby(request):
-    return render(request, "multiplayer_chess/lobby.html")
+def lobby(request, mode):
+    return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
 @login_required(login_url='/login')
-def classic_chess(request, room_number):
+def chess_game(request, room_number, variant):
 
     games = Game.objects.filter(room_id=room_number)
     game = games.first()
@@ -122,12 +122,14 @@ def classic_chess(request, room_number):
 
 
     ctx = {
-        "title" : "Classic chess",
+        "title" : "Partita scacchi",
         "order": order,
         "room_number": room_number,
         'username': username1,
         'user_image': profile1.photo,
         'username2': username2,
-        'user2_image': profile2.photo
+        'user2_image': profile2.photo,
+        'variant': variant,
     }
-    return render(request, template_name="multiplayer_chess/classic_chess.html", context=ctx)
+    return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
+    

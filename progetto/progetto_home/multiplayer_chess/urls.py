@@ -13,9 +13,9 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('edit/', views.edit, name='edit'),
     path('password-change/', views.my_password_change_view, name='password_change'),
-    path("lobby/", views.lobby, name="lobby"),
+    path("lobby/<str:mode>/", views.lobby, name="lobby"),
+    path("<str:variant>/<str:room_number>/", views.chess_game, name="chess_game")
     #----------------------------------------------------------------------------------------------------
-    path("classic_chess/<str:room_number>/", views.classic_chess, name="classic_chess"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 

@@ -14,3 +14,8 @@ class Game(models.Model):
     player1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='game_as_player1', on_delete=models.CASCADE, null=True)
     player2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='game_as_player2', on_delete=models.CASCADE, null=True)
     room_id = models.IntegerField(primary_key=True)
+    MODE_CHOICES = [
+        ('classic', 'Classic'),
+        ('atomic', 'Atomic'),
+    ]
+    mode = models.CharField(max_length=10, choices=MODE_CHOICES, null=True)

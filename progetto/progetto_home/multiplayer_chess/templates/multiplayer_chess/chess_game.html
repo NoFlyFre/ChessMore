@@ -1,0 +1,308 @@
+{% extends 'multiplayer_chess/base_for_classic_chess.html' %}
+
+{%block head %}
+<style>
+
+    .move{
+        display: flex;
+    }
+    
+    .move .intern_div{
+        padding-left: 10px;
+        width: 70px;
+    }
+
+    .input::placeholder{
+        color: #3e3e3e !important;
+        opacity: 1;
+    }
+
+    ::-moz-placeholder{
+        color: white;
+        opacity: 1;
+    }
+
+    .img-thumbnail{
+        width: 150px;
+        height: 150px;
+        background-color: black;
+        border-color: #3e3e3e;
+    }
+
+    .wrapper{
+        width: 90%;
+        margin: auto;
+        height: auto;
+        display: flex;
+    }
+    
+    .column{
+        float: left;
+    }
+    .left{
+        width: 30%
+    }
+    .middle{
+        width: 40%;
+    }
+    .right{
+        width: 30%
+    }
+    .row:after{
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .input{
+        color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
+    }
+</style>
+
+{% load static %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+<link rel="stylesheet" href="{% static 'multiplayer_chess/chessboardjs-1.0.0/css/chessboard-1.0.0.min.css' %}">
+<script>var exports = {};</script>
+<script src="{% static 'multiplayer_chess/jquery-3.6.4.min.js' %}"></script>
+<script src="{% static 'multiplayer_chess/chessboardjs-1.0.0/js/chessboard-1.0.0.min.js' %}"></script>
+{% endblock %}
+
+{% block title %} {{title}} {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="column left">
+        
+        <div class="cronologia">
+            <h1>Cronologia</h1>
+            <div
+              id="history"
+              style="
+                width: 50px;
+                margin-left: 10px;
+                margin-top: 10px;
+                padding: 10px;
+                height: 54vh;
+                width: 30%;
+                background-color: #fefae0;
+                overflow-y: scroll;
+                border: 1px solid black;
+                border-radius: 10px;
+              "
+            ></div>
+          </div>
+    
+    </div>
+    <div class="column middle">
+      <div class="float-start ms-4 mb-1">
+        {% if user_image %}
+        <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="img-thumbnail">
+        {% endif %}
+      </div>
+      <div>
+        <p class="fs-3 float-start ms-3" style="color: black"> {{ username2 }}</p>
+      </div>
+      <div class="container float-end">
+          <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
+      </div>
+      <div class="float-start ms-4 mt-1">
+          {% if user2_image %}
+          <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail">
+          {% endif %}
+        </div>
+        <div>
+          <p class="fs-3 float-start ms-3" style="color: black"> {{ username }}</p>
+        </div>
+    </div>
+    <div class="column right">
+        <div class="container d-grid gap-2 col-6 mx-auto">
+            <div class="box bg-dark text-light">
+                <div id="chat-message-container" class="container">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input class="input bg-dark border-dark text-light " type="text" placeholder="Message" id="chat-message-input">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input id="chat-message-submit" type="button" value="Invia" class="btn btn-success">
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger btn-lg mt-5">Abbandona la partita</button>
+        </div>
+    </div>
+</div>
+{{ username|json_script:"username" }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    function onDragStart (source, piece, position, orientation) {
+        if (game_status || (turn === "w" && piece.search(/^b/) !== -1) ||
+            (turn === "b" && piece.search(/^w/) !== -1) || turn != orientation[0]) {
+            return false;
+        }
+    }
+
+    
+    function onDrop (source, target, piece, newPos, oldPos, orientation) {
+        if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
+            prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
+            send_move(source, target, prom)
+        }
+        send_move(source, target, "");
+    }
+
+    function check_status (fen) {
+
+        board.position(fen);
+
+        switch(game_status){
+            
+            case "checkmate":
+                let winner = "bianchi";
+                if(turn === 'w') 
+                    winner = "neri";
+                alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+                break;
+                
+            case "stalemate":
+                alert("La partita è finita in pareggio per stallo!")
+                break;
+
+            case "insufficient":
+                alert("La partita è finita in pareggio per posizione morta!")
+                break;
+            
+            case "var_draw":
+                alert("La partita è finita in pareggio per una regola della variante!")
+                break;
+
+            case "var_loss":
+                let winner2 = "bianchi"
+                if(turn === 'w')
+                    winner2 = "neri"
+                alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2)
+                break;
+        }
+
+    }
+
+    function pieceTheme (piece) {
+        return "{% static '/multiplayer_chess/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
+    }
+
+    let orientation = 'white';
+
+    {% if order == 2 %}
+        orientation = 'black';
+    {% endif %}
+
+    let config = {
+        orientation: orientation,
+        draggable: true,
+        pieceTheme: pieceTheme,
+        position: 'start',
+        onDragStart: onDragStart,
+        onDrop: onDrop,
+        onSnapEnd: check_status
+    };
+
+    let board = ChessBoard('myBoard', config);
+    let game_status = "";
+    let turn = "w";
+    let count = 1;
+
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + "{{room_number}}" + "/" + "{{variant}}" + "/");
+    console.log(socket);
+
+    socket.onmessage = function(e){
+        const data = JSON.parse(e.data);
+
+        if(data.type == 'game_move')
+        {
+            game_receive(data);
+        }
+        else {
+            message_receive(data);
+        }
+
+    };
+
+    function game_receive(data){
+        game_status = data.status;
+        turn = data.turn;
+        check_status(data.fen);
+        store_move(data.last_move, data.result);
+    }
+
+    function message_receive(data){
+
+            if (data.type === "connection_established") {
+                return;
+            }
+            var div = document.createElement("div");
+                div.innerHTML = data.username + ": " + data.message;
+                document.querySelector('#chat-message-container').appendChild(div);
+    }
+
+    function send_move(source, target, prom){
+        let obj = new Object();
+        obj.move = source + target + prom;
+        obj.type = 'game_move';
+        let string = JSON.stringify(obj);
+        socket.send(string);
+    }
+
+    function store_move(move, result) {
+        if(result == 'success'){
+            var div = document.createElement("div");
+            div.setAttribute('class','move')
+            div.setAttribute('id', 'move' + count);
+            div.innerHTML = count + ". ";
+            var intern_div = document.createElement("div");
+            intern_div.setAttribute('class','intern_div')
+            intern_div.innerHTML = move;
+            document.querySelector('#history').appendChild(div);
+            document.querySelector('#move' + count).appendChild(intern_div);
+            create_div = false;
+        }
+        else {
+            var intern_div = document.createElement("div");
+            intern_div.setAttribute('class','intern_div')
+            var div = document.querySelector('#move' + count);
+            intern_div.innerHTML = move;
+            div.appendChild(intern_div);
+            create_div = true;
+            count ++;
+        }
+
+    }
+
+    document.querySelector('#chat-message-submit').onclick = function(e){
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        const userName = JSON.parse(document.getElementById('username').textContent);
+
+        socket.send(JSON.stringify({
+            'type': 'messaggio',
+            'message': message,
+            'username': userName
+        }));
+
+        messageInputDom.value = '';
+    }
+
+</script>
+{% endblock %}

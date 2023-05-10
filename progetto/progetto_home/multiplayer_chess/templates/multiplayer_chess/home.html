@@ -23,7 +23,7 @@
                 <div class="card">
                     <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_classic.jpg' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="{% url 'multiplayer_chess:lobby' %}" class="btn primary_bg stretched-link">Gioca a scacchi classici</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='classic' %}" class="btn primary_bg stretched-link">Gioca a scacchi classici</a>
                     </div>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                 <div class="card">
                     <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/atomic_chess.jpg' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi atomici</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='atomic' %}" class="btn primary_bg stretched-link">Gioca a scacchi atomici</a>
                     </div>
                 </div>
             </div>
