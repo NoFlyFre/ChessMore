@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.http import HttpResponse
 import time
+from django.views import View
 
 # Create your views here.
 
@@ -88,10 +90,13 @@ def my_password_change_view(request):
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
 
 
-
 @login_required(login_url='/login')
 def lobby(request, mode):
-    return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
+    print(request.META.get('HTTP_REFERER'))
+    if request.META.get('HTTP_REFERER') == 'http://localhost:8000/home/':
+        return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
+    messages.error(request, "Accedere alla lobby da gioca partita")
+    return redirect('multiplayer_chess:home')
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
