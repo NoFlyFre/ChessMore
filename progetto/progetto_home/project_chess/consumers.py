@@ -10,11 +10,6 @@ class Lobby(AsyncWebsocketConsumer):
 
     connected_users = []
     
-    channel_counter = {
-        'classic': 0,
-        'atomic': 0,
-    }
-
     firstConnection = {
         'classic': False,
         'atomic': False,
@@ -56,46 +51,64 @@ class Lobby(AsyncWebsocketConsumer):
 
     async def connect(self):
 
+        #dalla richiesta ricava l'utente e la modalità
         user = self.scope['user']
         self.mode = self.scope['url_route']['kwargs']['mode']
-        self.room_group_name = 'canali_lobby_' + self.mode
 
-        print(f'debugging: mode = {self.mode}')
+        #nome del gruppo
+        self.room_group_name = 'canali_lobby_' + self.mode
+        
+        #aggiunge il canale al gruppo
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
-        users_right_now = [t[0] for t in self.connected_users if t[1] == self.mode]
-        if user not in users_right_now:
-            Lobby.channel_counter[self.mode] += 1
+        #ricava gli utenti nella lobby in attesa per una determinata variante
+        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode]
+        
+        #se l'utente non è gia connesso per quella determinata variante imposta il
+        #flag firstConnection a true
+        if user not in users_lobby_variant:
             self.firstConnection[self.mode] = True
         else:
             self.firstConnection[self.mode] = False
         
+        #aggiunge l'utente agli utenti in attesa per una determinata variante
         self.connected_users.append((user, self.mode))
-        usernames = self.return_usernames()
 
+        #riaggiorno la variabile (ora c'è un utente in più che è stato appena aggiunto)
+        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode]
+
+        #ricava gli usernames degli utenti nella lobby in attesa per una determinata variante
+        usernames_lobby_variant = []
+        for user_lobby_variant in  users_lobby_variant:
+            usernames_lobby_variant.append(user_lobby_variant.username)
+        #rimuove le ripetizioni (ad. esempio lo stesso utente potrebbe avere due pagine aperte con la lobby)
+        usernames_lobby_variant_no_repetition = list(set(usernames_lobby_variant))
+        
         await self.accept()
 
-        if Lobby.channel_counter[self.mode] == 1:
+        
+        if len(usernames_lobby_variant_no_repetition) == 1:
 
+            #evita che di creare infinite partite ogni volta che l'utente refresha la pagina
             if self.firstConnection[self.mode]:
                 await sync_to_async(self.my_sync_crea_partita)(user, self.mode)
 
+            #greetings message
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
-                    "message": f"Hello, everyone! {usernames}",
+                    "message": f"Hello, everyone!",
                 }
             )       
 
-        print(Lobby.channel_counter [self.mode])
-
-        if Lobby.channel_counter [self.mode] == 2:
-
+        if len(usernames_lobby_variant_no_repetition) == 2:
+            #aggiunge il secondo giocatore alla partita
             room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user, self.mode)
+            #informa tutti coloro connessi al socket che la partita tra i due player sta per iniziare
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -104,19 +117,17 @@ class Lobby(AsyncWebsocketConsumer):
                     "mode": f"{self.mode}"
                 }
             )
-    
-
 
     async def disconnect(self, close_code):
-        # Remove the user from the list of connected users
+
+        #dalla richiesta ricava l'utente e la modalità
         user = self.scope['user']
         self.mode = self.scope['url_route']['kwargs']['mode']
 
-        
+        #nome del gruppo
         self.room_group_name = 'canali_lobby_' + self.mode
         
-        if self.connected_users[0].count(user) == 1:
-            Lobby.channel_counter [self.mode] -= 1
+        if self.connected_users.count((user, self.mode)) == 1:
             self.lastConnection[self.mode] = True
         else:
             self.lastConnection[self.mode] = False
@@ -130,8 +141,6 @@ class Lobby(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
-        print(Lobby.channel_counter[self.mode])
 
     async def chat_message(self, event):
         type = event["type"]
