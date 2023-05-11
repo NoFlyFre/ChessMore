@@ -2,11 +2,10 @@
 
 {%block head %}
 <style>
-
     .move{
         display: flex;
     }
-    
+
     .move .intern_div{
         padding-left: 10px;
         width: 70px;
@@ -25,7 +24,7 @@
     .img-thumbnail{
         width: 150px;
         height: 150px;
-        background-color: black;
+        background-color: #212529;
         border-color: #3e3e3e;
     }
 
@@ -35,7 +34,7 @@
         height: auto;
         display: flex;
     }
-    
+
     .column{
         float: left;
     }
@@ -60,11 +59,11 @@
         display: grid;
         grid-template-columns: 1fr 1fr; /* Two columns with equal width */
     }
-      
+
     .column-1 {
         background-color: #ccc;
     }
-      
+
     .column-2 {
         background-color: #eee;
     }
@@ -73,17 +72,17 @@
         display: grid;
         grid-template-columns: 1fr 1fr; /* Two columns with equal width */
     }
-      
+
     #move-container p {
         background-color: #ccc;
         margin: 0;
         padding: 10px;
     }
-      
+
     #move-container span {
         color: white;
     }
-    
+
 </style>
 
 {% load static %}
@@ -108,10 +107,13 @@
         {% endif %}
       </div>
       <div>
-        <p class="fs-3 float-start ms-3" style="color: black"> {{ username2 }}</p>
+        <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ username2 }}</p>
+      </div>
+      <div>
+        <p class="fs-3 float-end me-4 border border-3  border-dark" style="color: white">Timer<p>
       </div>
       <div class="container float-end">
-          <div id="myBoard" style="width: 500px; margin-left: auto; margin-right: auto;"></div>
+          <div id="myBoard"  class="border border-5  border-dark"style="width: 500px; margin-left: auto; margin-right: auto;"></div>
       </div>
       <div class="float-start ms-4 mt-1">
           {% if user2_image %}
@@ -119,12 +121,15 @@
           {% endif %}
         </div>
         <div>
-          <p class="fs-3 float-start ms-3" style="color: black"> {{ username }}</p>
+          <p class="fs-3 float-start ms-3 mt-1 border border-3  border-dark" style="color: white"> {{ username }}</p>
+        </div>
+        <div>
+          <p class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white">Timer<p>
         </div>
     </div>
     <div class="column right">
-        <div class="container d-grid gap-2 col-6 mx-auto">
-            <div class="box bg-dark text-light">
+        <div class="container d-grid gap-2 col-6 mx-auto mt-5">
+            <div class="box bg-dark text-light mt-5">
                 <div id="chat-message-container" class="container">
                 </div>
             </div>
@@ -143,23 +148,7 @@
     </div>
 </div>
 
-
-
-
 {{ username|json_script:"username" }}
-
-
-
-
-
-
-
-
-
-
-
-
-
 <script>
     function onDragStart (source, piece, position, orientation) {
         if (game_status || (turn === "w" && piece.search(/^b/) !== -1) ||
@@ -168,7 +157,6 @@
         }
     }
 
-    
     function onDrop (source, target, piece, newPos, oldPos, orientation) {
         if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
             prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
@@ -178,30 +166,23 @@
     }
 
     function check_status (fen) {
-
         board.position(fen);
-
         switch(game_status){
-            
             case "checkmate":
                 let winner = "bianchi";
-                if(turn === 'w') 
+                if(turn === 'w')
                     winner = "neri";
                 alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
                 break;
-                
             case "stalemate":
                 alert("La partita è finita in pareggio per stallo!")
                 break;
-
             case "insufficient":
                 alert("La partita è finita in pareggio per posizione morta!")
                 break;
-            
             case "var_draw":
                 alert("La partita è finita in pareggio per una regola della variante!")
                 break;
-
             case "var_loss":
                 let winner2 = "bianchi"
                 if(turn === 'w')
@@ -209,15 +190,12 @@
                 alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2)
                 break;
         }
-
     }
 
     function pieceTheme (piece) {
         return "{% static '/multiplayer_chess/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
     }
-
     let orientation = 'white';
-
     {% if order == 2 %}
         orientation = 'black';
     {% endif %}
@@ -253,15 +231,12 @@
 
     socket.onmessage = function(e){
         const data = JSON.parse(e.data);
-
-        if(data.type == 'game_move')
-        {
+        if(data.type == 'game_move'){
             game_receive(data);
         }
         else {
             message_receive(data);
         }
-
     };
 
     function game_receive(data){
@@ -296,7 +271,7 @@
             const moveSpan = document.createElement('span');
             moveSpan.appendChild(moveText);
             moveElement.appendChild(moveSpan);
-            moveElement.classList.add('bg-dark'); 
+            moveElement.classList.add('bg-dark');
             moveContainer.appendChild(moveElement);
         }
     }
@@ -305,15 +280,12 @@
         const messageInputDom = document.querySelector('#chat-message-input');
         const message = messageInputDom.value;
         const userName = JSON.parse(document.getElementById('username').textContent);
-
         socket.send(JSON.stringify({
             'type': 'messaggio',
             'message': message,
             'username': userName
         }));
-
         messageInputDom.value = '';
     }
-
 </script>
 {% endblock %}
