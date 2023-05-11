@@ -8,6 +8,9 @@ from .models import *
 from django.http import HttpResponse
 import time
 from django.views import View
+from django.http import JsonResponse
+from .models import Game
+import json
 
 # Create your views here.
 
@@ -135,3 +138,13 @@ def chess_game(request, room_number, variant):
     }
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
     
+
+
+def get_position(request, variant, room_number):
+    # Get the position here
+    game = Game.objects.get(pk=room_number)
+    fen = game.fen
+    turn = game.turn
+    position = {'fen': fen, 'turn':turn}
+    response_data = json.dumps(position)
+    return HttpResponse(response_data, content_type='application/json')

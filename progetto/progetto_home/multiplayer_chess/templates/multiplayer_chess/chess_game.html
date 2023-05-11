@@ -222,23 +222,34 @@
         orientation = 'black';
     {% endif %}
 
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + "{{room_number}}" + "/" + "{{variant}}" + "/");
+    console.log(socket);
+    
     let config = {
         orientation: orientation,
         draggable: true,
         pieceTheme: pieceTheme,
-        position: 'start',
         onDragStart: onDragStart,
         onDrop: onDrop,
         onSnapEnd: check_status
     };
 
-    let board = ChessBoard('myBoard', config);
-    let game_status = "";
-    let turn = "w";
-    let count = 1;
+    let board;
+    let turn;
+    
+    fetch("get_position/").then(response => response.json()).then(data => {
+        config.position = data.fen
+        turn = data.turn
+        board = ChessBoard('myBoard', config);
+    }).catch(error => console.error(error));
+    
+    /*
+    config.position = 'start'
+    board = ChessBoard('myBoard', config);
+    */
 
-    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + "{{room_number}}" + "/" + "{{variant}}" + "/");
-    console.log(socket);
+    let game_status = "";
+    let count = 1;
 
     socket.onmessage = function(e){
         const data = JSON.parse(e.data);

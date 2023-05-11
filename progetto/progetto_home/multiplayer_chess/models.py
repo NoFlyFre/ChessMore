@@ -19,3 +19,9 @@ class Game(models.Model):
         ('atomic', 'Atomic'),
     ]
     mode = models.CharField(max_length=10, choices=MODE_CHOICES, null=True)
+    fen = models.TextField(null=True, default='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    TURN_CHOICES = [
+        ('w', 'white'),
+        ('b', 'black'),
+    ]
+    turn = models.CharField(max_length=1, choices=TURN_CHOICES, default='w')

@@ -48,7 +48,6 @@ class Lobby(AsyncWebsocketConsumer):
             game = games.first()
             game.delete()
     
-
     async def connect(self):
 
         #dalla richiesta ricava l'utente e la modalità
@@ -167,11 +166,32 @@ class Lobby(AsyncWebsocketConsumer):
 
 class WSConsumerChess(AsyncWebsocketConsumer):
 
+    #
+    def my_sync_save_fen_and_turn(self, fen, turn):
+        games = Game.objects.filter(pk=self.room_name)
+        game = games.first()
+        game.fen = fen
+        game.turn = turn
+        game.save()
+    #
+
+    #
+    def my_sync_retrive_fen(self):
+        games = Game.objects.filter(pk=self.room_name)
+        game = games.first()
+        return game.fen
+    #
+
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.variant = self.scope['url_route']['kwargs']['variant']
         self.room_group_name = 'game_' + self.room_name
-        game_logic.new_game(self.room_name, self.variant)
+
+        #
+        fen = await sync_to_async(self.my_sync_retrive_fen)()
+        game_logic.new_game(self.room_name, self.variant, fen)
+        #
+
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -179,7 +199,7 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-
+        
         await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -206,6 +226,11 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             status = game_logic.status(self.room_name)
             turn = game_logic.turn(self.room_name)
 
+            #
+            await sync_to_async(self.my_sync_save_fen_and_turn)(fen, turn)
+            #
+
+            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
