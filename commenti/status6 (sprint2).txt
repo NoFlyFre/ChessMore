@@ -1,0 +1,46 @@
+7 MAGGIO
+
+TEAM
+Cosmin Iulian Burlacu	SM
+Edward Pini	PO
+Gabriel Panini	T
+Vittorio de Simone	T
+Giovanni Cocchi	T
+Francesco Caligiuri	T
+
+
+
+Checklist
+IM: Mattermost*SH: in uso con attività presente in canali in cui non sono presente
+Taiga*SH: in uso, sembra aggiornato. Solo 2 persone però fanno modifiche...come mai?
+SRS (opt): Presente
+Git stats(main): commit molto sbilanciati a favore di due componenti. Tuttavia, l'analisi è parziale a causa di un errore ignoto presente nel repo: "warning: il rilevamento esaustivo della ridenominazione è stato saltato a causa di troppi file.
+warning: potresti voler impostare la variabile diff.renameLimit ad almeno 7025 e riprovare ad eseguire il comando."
+Scrumble: OK
+Codice (ling/FW/librerie scacchi): 
+Readme: OK, manca statement
+Scrumble: OK
+IDE: ?
+Diagrammi (Agg: *): Use Case (Perchè il motore di scacchi è fuori dal sistema??, inoltre tutti gli <<include>> che partono dalla partita a scacchi sono dettagli IMPLEMENTATIVI o di PROGRAMMAIZONE, non sono use case ), ER, Architetturli 
+
+Checklist specifico S2 
+Prodotto online: presente
+Aggiornamento US, BACKLOG, BURNDOWN, SPRINT GOAL, DOD, DOR, SPRINT BACKLOG, BACKLOG SNAPSHOTS: MANCA QUASI TUTTO DELLO S2
+Sprint review: 
+	S1: Più una demo che una sR
+	S2: OK, magari mettere qualche considerazione alla fine.
+Retrospective: 
+	S1: Buona
+	S2: MANCA!
+Testing/Coverage:  non si vedono, coverage 0%
+SQ: in uso.
+Devops: no
+
+
+COMMENTO GENERALE
+Avete in parte recuperato lo scivolone dello sprint precedente. Tuttavia a livello di feature siamo ancora un po' indietro, manca tutta o quasi la documentazione dello sprint 2, non ci sono test. 
+Dall'esterno, si ha l'impressione che il gruppo lavori poco e/o che l'organizzazione del lavoro non sia granché. 
+
+Il programma è abbastanza usabile, anzi, secondo me avete realizzato PIU' funzionalità di quelle che avete detto, ma non sono chiaaremente esposte (es: ricarca di avversari compatibili), e potreste "venderle" meglio. I casi eccezionali sono ancora un problema (es: "abbandona la partita")
+
+
