@@ -25,13 +25,13 @@ Diagrammi (Agg: *): Use Case (Perchè il motore di scacchi è fuori dal sistema?
 
 Checklist specifico S2 
 Prodotto online: presente
-Aggiornamento US, BACKLOG, BURNDOWN, SPRINT GOAL, DOD, DOR, SPRINT BACKLOG, BACKLOG SNAPSHOTS: MANCA QUASI TUTTO DELLO S2
+Aggiornamento US,  SPRINT GOAL DOD DOR, : MANCANO INVECE BACKLOG, BURNDOWN,SPRINT BACKLOG, BACKLOG SNAPSHOTS
 Sprint review: 
 	S1: Più una demo che una sR
 	S2: OK, magari mettere qualche considerazione alla fine.
 Retrospective: 
 	S1: Buona
-	S2: MANCA!
+	S2: Buona
 Testing/Coverage:  non si vedono, coverage 0%
 SQ: in uso.
 Devops: no

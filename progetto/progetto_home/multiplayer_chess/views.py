@@ -92,11 +92,8 @@ def my_password_change_view(request):
 
 @login_required(login_url='/login')
 def lobby(request, mode):
-    print(request.META.get('HTTP_REFERER'))
-    if request.META.get('HTTP_REFERER') == 'http://localhost:8000/home/':
-        return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
-    messages.error(request, "Accedere alla lobby da gioca partita")
-    return redirect('multiplayer_chess:home')
+    return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
+    
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
