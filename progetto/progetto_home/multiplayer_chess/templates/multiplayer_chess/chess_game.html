@@ -22,8 +22,8 @@
     }
 
     .img-thumbnail{
-        width: 150px;
-        height: 150px;
+        width: 65px;
+        height: 65px;
         background-color: #212529;
         border-color: #3e3e3e;
     }
@@ -84,7 +84,6 @@
     }
 
 </style>
-
 {% load static %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
 <link rel="stylesheet" href="{% static 'multiplayer_chess/chessboardjs-1.0.0/css/chessboard-1.0.0.min.css' %}">
@@ -92,9 +91,7 @@
 <script src="{% static 'multiplayer_chess/jquery-3.6.4.min.js' %}"></script>
 <script src="{% static 'multiplayer_chess/chessboardjs-1.0.0/js/chessboard-1.0.0.min.js' %}"></script>
 {% endblock %}
-
 {% block title %} {{title}} {% endblock %}
-
 {% block content %}
 <div class="row">
     <div class="column left">
@@ -109,9 +106,7 @@
       <div>
         <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ username2 }}</p>
       </div>
-      <div>
-        <p class="fs-3 float-end me-4 border border-3  border-dark" style="color: white">Timer<p>
-      </div>
+      <div class="fs-3 float-end me-4 border border-3  border-dark" style="color: white" onload="timer">Timer</div>
       <div class="container float-end">
           <div id="myBoard"  class="border border-5  border-dark"style="width: 500px; margin-left: auto; margin-right: auto;"></div>
       </div>
@@ -123,9 +118,7 @@
         <div>
           <p class="fs-3 float-start ms-3 mt-1 border border-3  border-dark" style="color: white"> {{ username }}</p>
         </div>
-        <div>
-          <p class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white">Timer<p>
-        </div>
+        <div class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white" onload="timer()">Timer</div>
     </div>
     <div class="column right">
         <div class="container d-grid gap-2 col-6 mx-auto mt-5">
@@ -157,6 +150,16 @@
         }
     }
 
+    function timer(){ //funzione Timer
+        var sec = 180;
+        var timer = setInterval(function(){
+            document.getElementById('safeTimerDisplay').innerHTML='00:'+sec;
+            sec--;
+            if (sec < 0) {
+                clearInterval(timer);
+            }
+        }, 1000);
+    }
     function onDrop (source, target, piece, newPos, oldPos, orientation) {
         if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
             prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
@@ -202,7 +205,7 @@
 
     const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + "{{room_number}}" + "/" + "{{variant}}" + "/");
     console.log(socket);
-    
+
     let config = {
         orientation: orientation,
         draggable: true,
@@ -214,13 +217,13 @@
 
     let board;
     let turn;
-    
+
     fetch("get_position/").then(response => response.json()).then(data => {
         config.position = data.fen
         turn = data.turn
         board = ChessBoard('myBoard', config);
     }).catch(error => console.error(error));
-    
+
     /*
     config.position = 'start'
     board = ChessBoard('myBoard', config);

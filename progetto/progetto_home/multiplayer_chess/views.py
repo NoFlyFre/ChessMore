@@ -12,14 +12,10 @@ from django.http import JsonResponse
 from .models import Game
 import json
 
-# Create your views here.
-
-
 def index(request):
     if request.user.is_authenticated:
         return redirect('multiplayer_chess:home')
     return redirect('multiplayer_chess:login')
-
 
 def loginView(request):
     if request.method == "POST":
@@ -32,16 +28,16 @@ def loginView(request):
                 login(request, user)
                 return redirect("multiplayer_chess:home")
             else:
-                messages.error(request, "Invalid username or password.")
+                messages.error(request, "questo username è già stato preso; riprovare.")
         else:
-            messages.error(request, "Invalid username or password.")
+            messages.error(request, "username o password errati; riprovare.")
     form = LoginForm()
     return render(request=request, template_name="multiplayer_chess/login.html", context={"login_form": form})
 
 
 def logoutView(request):
     logout(request)
-    messages.success(request, "Logged out")
+    messages.success(request, "hai eseguito il log-out con successo.")
     return redirect("multiplayer_chess:login")
 
 
@@ -51,10 +47,10 @@ def registerView(request):
         try:
             user = form.save()
             Profile.objects.create(user=user)
-            messages.success(request, "Registration successful, you can now log-in")
+            messages.success(request, "registrazione avvenuta con successo; adesso, acceda al suo profilo.")
             return redirect("multiplayer_chess:login")
         except Exception as e:
-            messages.error(request, str(e))
+            messages.error(request, "qualcosa è andato storto durante la registrazione; riprovare.")
     form = RegisterForm()
     return render(request=request, template_name="multiplayer_chess/register.html", context={"register_form": form})
 
@@ -70,9 +66,9 @@ def edit(request):
         try:
             user_form.save()
             profile_form.save()
-            messages.success(request, "profilo modificato con successo")
+            messages.success(request, "profilo modificato con successo.")
         except Exception as e:
-            messages.error(request, str(e))
+            messages.error(request, "qualcosa è andato storto durante la modifica; riprovare.")
     else:
         user_form = UserEditForm(instance=request.user)
         profile_form = ProfileEditForm(instance=request.user.profile)
@@ -84,10 +80,10 @@ def my_password_change_view(request):
         form = CustomPasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Password modificata con successo, è necessario riautenticarsi")
+            messages.success(request, "Password modificata con successo, è necessario riautenticarsi.")
             return redirect('/login/')
         else:
-            messages.error(request, "La modifica non è riuscita.")
+            messages.error(request, "qualcosa è andato storto durante la modifica; riprovare.")
     else:
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
@@ -96,7 +92,7 @@ def my_password_change_view(request):
 @login_required(login_url='/login')
 def lobby(request, mode):
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
-    
+
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +104,7 @@ def chess_game(request, room_number, variant):
     game = games.first()
     user = request.user
     if game.player1 != user and game.player2 != user:
-        return HttpResponse("Non fai parte di questa stanza")
+        return HttpResponse("Non fai parte di questa stanza.")
 
     order = 1 if game.player1 == user else 2
 
@@ -137,7 +133,7 @@ def chess_game(request, room_number, variant):
         'variant': variant,
     }
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
-    
+
 
 
 def get_position(request, variant, room_number):
