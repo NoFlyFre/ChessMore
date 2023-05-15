@@ -133,7 +133,7 @@ class Lobby(AsyncWebsocketConsumer):
 
         self.connected_users.remove((self.scope['user'], self.mode))
 
-        if self.lastConnection:
+        if self.lastConnection[self.mode]:
             await sync_to_async(self.my_sync_togli_partita)(self.mode)
 
         await self.channel_layer.group_discard(

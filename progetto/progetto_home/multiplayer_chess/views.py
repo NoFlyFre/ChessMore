@@ -91,6 +91,10 @@ def my_password_change_view(request):
 
 @login_required(login_url='/login')
 def lobby(request, mode):
+    modes = ('classic','atomic')
+    if mode not in modes:
+        messages.error(request, "Variante non disponibile")
+        return redirect('/home/')
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
 
@@ -104,7 +108,8 @@ def chess_game(request, room_number, variant):
     game = games.first()
     user = request.user
     if game.player1 != user and game.player2 != user:
-        return HttpResponse("Non fai parte di questa stanza.")
+        messages.error(request, "Non fai parte di questa lobby")
+        return redirect('/home/')
 
     order = 1 if game.player1 == user else 2
 
