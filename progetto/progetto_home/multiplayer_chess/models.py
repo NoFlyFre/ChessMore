@@ -25,3 +25,10 @@ class Game(models.Model):
         ('b', 'black'),
     ]
     turn = models.CharField(max_length=1, choices=TURN_CHOICES, default='w')
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='vincitore', on_delete=models.CASCADE, null=True)
+    STATUS_CHOICES= [
+        ('created','Partita creata, in attesa dell\'avversario'),
+        ('started','Partita iniziata'),
+        ('finished','Partita terminata')
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='created')

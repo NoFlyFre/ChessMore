@@ -11,6 +11,9 @@ from django.views import View
 from django.http import JsonResponse
 from .models import Game
 import json
+from django.db.models import Q
+from django.urls import reverse
+from django.views.decorators.cache import cache_control
 
 def index(request):
     if request.user.is_authenticated:
@@ -54,8 +57,14 @@ def registerView(request):
     form = RegisterForm()
     return render(request=request, template_name="multiplayer_chess/register.html", context={"register_form": form})
 
+
+@cache_control(no_cache=True, max_age=1)
 @login_required(login_url='/login')
 def home(request):
+    games = Game.objects.filter(Q(player1=request.user) | Q(player2=request.user))
+    game = games.first()
+    if game is not None and game.status == 'started':
+        return redirect(reverse('multiplayer_chess:chess_game', args=(game.mode, game.room_id)) + '?redirected=true')
     return render(request=request, template_name='multiplayer_chess/home.html')
 
 @login_required(login_url='/login')
@@ -89,18 +98,22 @@ def my_password_change_view(request):
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
 
 
+@cache_control(no_cache=True)
 @login_required(login_url='/login')
 def lobby(request, mode):
     modes = ('classic','atomic')
     if mode not in modes:
         messages.error(request, "Variante non disponibile")
         return redirect('/home/')
+    games = Game.objects.filter(Q(player1=request.user) | Q(player2=request.user))
+    game = games.first()
+    if game is not None and game.status == 'started':
+        return redirect(reverse('multiplayer_chess:chess_game', args=(game.mode, game.room_id)) + '?redirected=true')
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
 
-
 #-------------------------------------------------------------------------------------------------------------------------------------------
-
+@cache_control(no_cache=True)
 @login_required(login_url='/login')
 def chess_game(request, room_number, variant):
 
@@ -110,6 +123,10 @@ def chess_game(request, room_number, variant):
     if game.player1 != user and game.player2 != user:
         messages.error(request, "Non fai parte di questa lobby")
         return redirect('/home/')
+    if game.status == 'finished':
+        messages.error(request, "La partita è terminata")
+        return redirect('/home/')
+    
 
     order = 1 if game.player1 == user else 2
 
@@ -137,9 +154,12 @@ def chess_game(request, room_number, variant):
         'user2_image': profile2.photo,
         'variant': variant,
     }
+    is_redirected = request.GET.get('redirected', False)
+    if is_redirected:
+        messages.success(request, "Partita recuperata con successo a seguito di una disconnessione, per abbandonare, invece, clicca \"Abbandona la partita\" ")
+        return redirect(reverse('multiplayer_chess:chess_game', args=(game.mode, game.room_id)))
+
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
-
-
 
 def get_position(request, variant, room_number):
     # Get the position here
@@ -149,3 +169,5 @@ def get_position(request, variant, room_number):
     position = {'fen': fen, 'turn':turn}
     response_data = json.dumps(position)
     return HttpResponse(response_data, content_type='application/json')
+
+

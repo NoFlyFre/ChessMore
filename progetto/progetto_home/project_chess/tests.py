@@ -357,8 +357,6 @@ class ProfileEditFormTest(TestCase):
         self.assertEqual(self.profile.date_of_birth, date(2001,10,10))
 
 
-
-
 class CustomPasswordChangeFormTest(TestCase):
 
     def setUp(self):
@@ -610,32 +608,6 @@ class GameTest(TestCase):
 
 #self.assertTemplateUsed(response, 'multiplayer_chess/chess_game.html')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ####################################
 ##          test consumers        ##
 ####################################
@@ -786,3 +758,5 @@ class MyLobbyTestCase(TestCase):
     async def test_two_users(self):
         await self._test_two_users('classic')
         await self._test_two_users('atomic')
+
+

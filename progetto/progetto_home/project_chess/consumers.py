@@ -39,6 +39,7 @@ class Lobby(AsyncWebsocketConsumer):
         games = Game.objects.filter(player2__isnull=True, mode=mode_parameter)
         game = games.first()
         game.player2 = user
+        game.status = 'started'
         game.save()
         return game.room_id
     
@@ -182,6 +183,23 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         return game.fen
     #
 
+    def my_sync_save_winner(self, turn):
+        games = Game.objects.filter(pk=self.room_name)
+        game = games.first()
+        if turn == 'w':
+            game.winner = game.player2
+        else:
+            game.winner = game.player1
+        game.status = 'finished'
+        game.save()
+
+
+    def my_sync_save_draw(self):
+        games = Game.objects.filter(pk=self.room_name)
+        game = games.first()
+        game.status = 'finished'
+        game.save()
+
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.variant = self.scope['url_route']['kwargs']['variant']
@@ -225,7 +243,15 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             fen = game_logic.fen(self.room_name)
             status = game_logic.status(self.room_name)
             turn = game_logic.turn(self.room_name)
-
+            if status == "checkmate":
+                await sync_to_async(self.my_sync_save_winner)(turn)
+            if status == "stalemate" or status == "var_draw" or status == "insufficient":
+                await sync_to_async(self.my_sync_save_draw)()
+            if status == "var_loss":
+                if turn == 'w':
+                    await sync_to_async(self.my_sync_save_winner)('b')
+                else:
+                    await sync_to_async(self.my_sync_save_winner)(turn)
             #
             await sync_to_async(self.my_sync_save_fen_and_turn)(fen, turn)
             #
