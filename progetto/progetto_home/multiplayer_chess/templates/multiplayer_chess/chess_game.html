@@ -1,24 +1,6 @@
 {% extends 'multiplayer_chess/base_for_classic_chess.html' %}
 
 {%block head %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-{% if messages %}
-    {% for message in messages %}
-        {% if message.tags == 'error' %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            {{ message }}
-        </div>
-        {% elif message.tags == 'success' %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            {{ message }}
-        </div>
-        {% endif %}
-    {% endfor %}
-{% endif %}
-
 <style>
     .move{
         display: flex;
@@ -124,7 +106,7 @@
       <div>
         <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ username2 }}</p>
       </div>
-      <div class="fs-3 float-end me-4 border border-3  border-dark" style="color: white" onload="timer">Timer</div>
+      <div id="timer2" class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white"></div>
       <div class="container float-end">
           <div id="myBoard"  class="border border-5  border-dark"style="width: 500px; margin-left: auto; margin-right: auto;"></div>
       </div>
@@ -136,7 +118,7 @@
         <div>
           <p class="fs-3 float-start ms-3 mt-1 border border-3  border-dark" style="color: white"> {{ username }}</p>
         </div>
-        <div class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white" onload="timer()">Timer</div>
+        <div id="timer" class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white"></div>
     </div>
     <div class="column right">
         <div class="container d-grid gap-2 col-6 mx-auto mt-5">
@@ -154,14 +136,15 @@
                     <input id="chat-message-submit" type="button" value="Invia" class="btn btn-success">
                 </div>
             </div>
-            <button type="button" class="btn btn-danger btn-lg mt-5">Abbandona la partita</button>
-        </div>
+            <button type="button" id="myInput" class="btn btn-danger btn-lg mt-5" data-bs-toggle="modal"
+            data-bs-target="#modaleAbbandono">Abbandona la partita</button>
     </div>
+  </div>
 </div>
 
 {{ username|json_script:"username" }}
-<script>   
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
     function onDragStart (source, piece, position, orientation) {
         if (game_status || (turn === "w" && piece.search(/^b/) !== -1) ||
             (turn === "b" && piece.search(/^w/) !== -1) || turn != orientation[0]) {
@@ -169,18 +152,29 @@
         }
     }
 
-    function timer(){ //funzione Timer
-        var sec = 180;
-        var timer = setInterval(function(){
-            document.getElementById('safeTimerDisplay').innerHTML='00:'+sec;
-            sec--;
-            if (sec < 0) {
-                clearInterval(timer);
-            }
-        }, 1000);
+    //funzione timer - NON é SINCRONIZZATA
+    var el2 = document.getElementById("timer2")
+    var el = document.getElementById("timer"),
+    mins = 3,
+    secs = 0;
+
+    function countDown() {
+      if (secs || mins) {
+        setTimeout(countDown, 1000);
+      }
+      el.innerHTML = mins + ":" + (secs.toString().length < 2 ? "0" + secs : secs); //padding di numeri
+      el2.innerHTML = mins + ":" + (secs.toString().length < 2 ? "0" + secs : secs); //padding di numeri
+      secs -= 1;
+      if (secs < 0) {
+        mins -= 1;
+        secs = 59;
+      }
     }
+    countDown();
+
     function onDrop (source, target, piece, newPos, oldPos, orientation) {
         if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
+          //$('#modalePromozione').modal('show');
             prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
             send_move(source, target, prom)
         }
@@ -213,12 +207,12 @@
                 break;
         }
     }
-    
+
     function pieceTheme (piece) {
         return "{% static '/multiplayer_chess/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
     }
     let orientation = 'white';
-    {% if order == 2 and variant != "racingkings" %}
+    {% if order == 2 %}
         orientation = 'black';
     {% endif %}
 
@@ -309,5 +303,14 @@
         }));
         messageInputDom.value = '';
     }
+
+    $(document).ready(function () {
+      $('#modalePromozione').modal('hide');
+            $("#myInput").on("click", function () {
+                $('#modaleAbbandono').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            });
+        });
 </script>
 {% endblock %}

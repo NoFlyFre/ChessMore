@@ -12,4 +12,30 @@
 {% block content %}
 {% endblock %}
 </body>
+<div class="modal fade" id="modaleAbbandono" tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="AbbandonoLabel">Sei sicuro?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">Sei sicuro di voler abbandonare la partita?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        <a type="button" class="btn btn-primary text-light" href="{% url 'multiplayer_chess:home' %}">Sì</a>
+      </div></div></div></div>
+<div class="modal fade" id="modalePromozione" data-bs-backdrop="static" data-bs-keyboard="false"
+ tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PromozionelLabel">In quale pezzo vorresti promuovere il pedone?</h5>
+      </div>
+      <div class="modal-body">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Regina</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cavallo</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Alfiere</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Torre</button>
+      </div>
+      </div></div></div>
 </html>
