@@ -48,7 +48,7 @@
                 <div class="card">
                     <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/anti_chess.jpg' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi vinciperdi</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='antichess' %}" class="btn primary_bg stretched-link">Gioca a scacchi vinciperdi</a>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                 <div class="card">
                     <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_suicide.jpg' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi suicidio</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='suicide' %}" class="btn primary_bg stretched-link">Gioca a scacchi suicidio</a>
                     </div>
                 </div>
             </div>

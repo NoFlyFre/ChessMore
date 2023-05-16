@@ -7,6 +7,10 @@ games = {}
 def new_game(id, variant, parametro_fen):
     if variant == "atomic":
         games[id] = chess.variant.AtomicBoard(fen=parametro_fen)
+    elif variant == "suicide":
+        games[id] = chess.variant.SuicideBoard(fen=parametro_fen)
+    elif variant == "antichess":
+        games[id] = chess.variant.AntichessBoard(fen=parametro_fen)
     else:
         games[id] = chess.Board(fen=parametro_fen)
 

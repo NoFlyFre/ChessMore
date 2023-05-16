@@ -13,11 +13,15 @@ class Lobby(AsyncWebsocketConsumer):
     firstConnection = {
         'classic': False,
         'atomic': False,
+        'suicide': False,
+        'antichess': False
     }
 
     lastConnection = {
         'classic': False,
         'atomic': False,
+        'suicide': False,
+        'antichess': False
     }
 
     def return_usernames(self):
