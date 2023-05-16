@@ -18,9 +18,12 @@ class Game(models.Model):
         ('classic', 'Classic'),
         ('atomic', 'Atomic'),
         ('antichess', 'Antichess'),
-        ('suicide', 'Suicide'),
+        ('kingofthehill', 'Kingofthehill'),
+        ('threecheck', 'Threecheck'),
+        ('horde', 'Horde'),
+        ('racingkings', 'Racingkings')
     ]
-    mode = models.CharField(max_length=10, choices=MODE_CHOICES, null=True)
+    mode = models.CharField(max_length=13, choices=MODE_CHOICES, null=True)
     fen = models.TextField(null=True, default='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     TURN_CHOICES = [
         ('w', 'white'),

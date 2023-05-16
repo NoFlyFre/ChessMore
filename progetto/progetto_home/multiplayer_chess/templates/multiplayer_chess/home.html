@@ -54,9 +54,9 @@
             </div>
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_suicide.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/king_of_the_hill_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="{% url 'multiplayer_chess:lobby' mode='suicide' %}" class="btn primary_bg stretched-link">Gioca a scacchi suicidio</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='kingofthehill' %}" class="btn primary_bg stretched-link">Gioca a scacchi king of the hill</a>
                     </div>
                 </div>
             </div>
@@ -73,25 +73,25 @@
         <div class="row second-row">
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/three_check_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='threecheck' %}" class="btn primary_bg stretched-link">Gioca a scacchi 3-check</a>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/horde_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='horde' %}" class="btn primary_bg stretched-link">Gioca a scacchi orda</a>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/racing_kings_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='racingkings' %}" class="btn primary_bg stretched-link">Gioca a scacchi racing kings</a>
                     </div>
                 </div>
             </div>

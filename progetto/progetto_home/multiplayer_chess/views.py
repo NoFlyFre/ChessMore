@@ -101,7 +101,7 @@ def my_password_change_view(request):
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
 def lobby(request, mode):
-    modes = ('classic', 'atomic', 'antichess', 'suicide')
+    modes = ('classic', 'atomic', 'antichess', 'kingofthehill', 'threecheck', 'horde', 'racingkings')
     if mode not in modes:
         messages.error(request, "Variante non disponibile")
         return redirect('/home/')

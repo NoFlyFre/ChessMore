@@ -13,15 +13,21 @@ class Lobby(AsyncWebsocketConsumer):
     firstConnection = {
         'classic': False,
         'atomic': False,
-        'suicide': False,
-        'antichess': False
+        'antichess': False,
+        'kingofthehill': False,
+        'threecheck': False,
+        'horde': False,
+        'racingkings': False
     }
 
     lastConnection = {
         'classic': False,
         'atomic': False,
-        'suicide': False,
-        'antichess': False
+        'antichess': False,
+        'kingofthehill': False,
+        'threecheck': False,
+        'horde': False,
+        'racingkings': False
     }
 
     def return_usernames(self):
@@ -36,6 +42,10 @@ class Lobby(AsyncWebsocketConsumer):
         game.room_id = max_id + 1
         game.player1 = user
         game.mode = mode_parameter
+        if mode_parameter == 'horde':
+            game.fen = 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1'
+        elif mode_parameter == 'racingkings':
+            game.fen = '8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - - 0 1'
         game.save()
 
 

@@ -218,7 +218,7 @@
         return "{% static '/multiplayer_chess/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
     }
     let orientation = 'white';
-    {% if order == 2 %}
+    {% if order == 2 and variant != "racingkings" %}
         orientation = 'black';
     {% endif %}
 
