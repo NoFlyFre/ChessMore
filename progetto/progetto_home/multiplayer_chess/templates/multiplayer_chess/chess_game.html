@@ -101,6 +101,8 @@
       <div class="float-start ms-4 mb-1">
         {% if user_image %}
         <img src="/media/{{ user_image }}" alt="{{ username }}'s Image" class="img-thumbnail">
+        {% else %}
+        <img src="{% static 'multiplayer_chess/images/user.jpg' %}" alt="Default Image" class="img-thumbnail">
         {% endif %}
       </div>
       <div>
@@ -112,7 +114,9 @@
       </div>
       <div class="float-start ms-4 mt-1">
           {% if user2_image %}
-          <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail">
+            <img src="/media/{{ user2_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail">
+          {% else %}
+            <img src="{% static 'multiplayer_chess/images/user.jpg' %}" alt="Default Image" class="img-thumbnail">
           {% endif %}
         </div>
         <div>
@@ -141,6 +145,7 @@
     </div>
   </div>
 </div>
+
 
 {{ username|json_script:"username" }}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
