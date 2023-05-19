@@ -106,8 +106,13 @@
         {% endif %}
       </div>
       <div>
-        <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ username2 }}</p>
+        <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ username }}</p>
       </div>
+      {% if user_elo1 %}
+            <div>
+                <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ user_elo1 }}</p>
+            </div>
+       {% endif %}
       <div id="timer2" class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white"></div>
       <div class="container float-end">
           <div id="myBoard"  class="border border-5  border-dark"style="width: 500px; margin-left: auto; margin-right: auto;"></div>
@@ -120,8 +125,13 @@
           {% endif %}
         </div>
         <div>
-          <p class="fs-3 float-start ms-3 mt-1 border border-3  border-dark" style="color: white"> {{ username }}</p>
+          <p class="fs-3 float-start ms-4 mt-1 border border-3  border-dark" style="color: white"> {{ username2 }}</p>
         </div>
+        {% if user_elo2 %}
+            <div>
+                <p class="fs-3 float-start mt-1 ms-3 border border-3  border-dark" style="color: white"> {{ user_elo2 }}</p>
+            </div>
+        {% endif %}
         <div id="timer" class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white"></div>
     </div>
     <div class="column right">

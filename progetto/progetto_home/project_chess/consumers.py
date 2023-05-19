@@ -1,6 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from multiplayer_chess .models import Game
+from multiplayer_chess.models import Game, Profile
 from django.db .models import Max
 from asgiref.sync import sync_to_async
 from . import game_logic
@@ -36,12 +36,13 @@ class Lobby(AsyncWebsocketConsumer):
             usernames.append(user[0].username)
         return usernames
     
-    def my_sync_crea_partita(self, user, mode_parameter):
+    def my_sync_crea_partita(self, user, mode_parameter, elo):
         max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
         game = Game()
         game.room_id = max_id + 1
         game.player1 = user
         game.mode = mode_parameter
+        game.elo_partita = elo
         if mode_parameter == 'horde':
             game.fen = 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1'
         elif mode_parameter == 'racingkings':
@@ -49,8 +50,8 @@ class Lobby(AsyncWebsocketConsumer):
         game.save()
 
 
-    def my_sync_aggiungi_secondo_player(self, user, mode_parameter):
-        games = Game.objects.filter(player2__isnull=True, mode=mode_parameter)
+    def my_sync_aggiungi_secondo_player(self, user, mode_parameter, elo):
+        games = Game.objects.filter(player2__isnull=True, mode=mode_parameter, elo_partita = elo )
         game = games.first()
         game.player2 = user
         game.status = 'started'
@@ -58,10 +59,25 @@ class Lobby(AsyncWebsocketConsumer):
         return game.room_id
     
     def my_sync_togli_partita(self, mode_parameter):
-        games = Game.objects.filter(player2__isnull=True, mode=mode_parameter)
+        games = Game.objects.filter(player1 = self.scope['user'], player2__isnull=True, mode=mode_parameter)
         if bool(games):
             game = games.first()
             game.delete()
+
+    def my_sync_get_elo_mode(self, mode_parameter):
+        user_profile = Profile.objects.get(user=self.scope['user'])
+        if mode_parameter == 'classic':
+            mode_elo = user_profile.elo_classic
+        elif mode_parameter == 'antichess':
+            mode_elo = user_profile.elo_antichess
+        elif mode_parameter == 'atomic':
+            mode_elo = user_profile.elo_atomic
+        else: 
+            mode_elo = 1000
+
+        rounded_elo = round(mode_elo, -2)
+        return rounded_elo
+
     
     async def connect(self):
 
@@ -78,8 +94,11 @@ class Lobby(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        #ricava gli utenti nella lobby in attesa per una determinata variante
-        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode]
+        self.rounded_elo = await sync_to_async(self.my_sync_get_elo_mode)(self.mode)
+        print(self.rounded_elo)
+
+        #ricava gli utenti nella lobby in attesa per una determinata variante e con un determinato elo
+        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
         
         #se l'utente non è gia connesso per quella determinata variante imposta il
         #flag firstConnection a true
@@ -89,10 +108,10 @@ class Lobby(AsyncWebsocketConsumer):
             self.firstConnection[self.mode] = False
         
         #aggiunge l'utente agli utenti in attesa per una determinata variante
-        self.connected_users.append((user, self.mode))
+        self.connected_users.append((user, self.mode, self.rounded_elo ))
 
         #riaggiorno la variabile (ora c'è un utente in più che è stato appena aggiunto)
-        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode]
+        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
 
         #ricava gli usernames degli utenti nella lobby in attesa per una determinata variante
         usernames_lobby_variant = []
@@ -108,7 +127,7 @@ class Lobby(AsyncWebsocketConsumer):
 
             #evita che di creare infinite partite ogni volta che l'utente refresha la pagina
             if self.firstConnection[self.mode]:
-                await sync_to_async(self.my_sync_crea_partita)(user, self.mode)
+                await sync_to_async(self.my_sync_crea_partita)(user, self.mode, self.rounded_elo)
 
             #greetings message
             await self.channel_layer.group_send(
@@ -121,7 +140,7 @@ class Lobby(AsyncWebsocketConsumer):
 
         if len(usernames_lobby_variant_no_repetition) == 2:
             #aggiunge il secondo giocatore alla partita
-            room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user, self.mode)
+            room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user, self.mode, self.rounded_elo)
             #informa tutti coloro connessi al socket che la partita tra i due player sta per iniziare
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -137,16 +156,17 @@ class Lobby(AsyncWebsocketConsumer):
         #dalla richiesta ricava l'utente e la modalità
         user = self.scope['user']
         self.mode = self.scope['url_route']['kwargs']['mode']
+        self.rounded_elo = await sync_to_async(self.my_sync_get_elo_mode)(self.mode)
 
         #nome del gruppo
         self.room_group_name = 'canali_lobby_' + self.mode
         
-        if self.connected_users.count((user, self.mode)) == 1:
+        if self.connected_users.count((user, self.mode, self.rounded_elo )) == 1:
             self.lastConnection[self.mode] = True
         else:
             self.lastConnection[self.mode] = False
 
-        self.connected_users.remove((self.scope['user'], self.mode))
+        self.connected_users.remove((user, self.mode, self.rounded_elo))
 
         if self.lastConnection[self.mode]:
             await sync_to_async(self.my_sync_togli_partita)(self.mode)
@@ -200,12 +220,38 @@ class WSConsumerChess(AsyncWebsocketConsumer):
     def my_sync_save_winner(self, turn):
         games = Game.objects.filter(pk=self.room_name)
         game = games.first()
+        profile_player1 = Profile.objects.get(user=game.player1)
+        profile_player2 = Profile.objects.get(user=game.player2)
+        print(profile_player1.elo_classic)
+        print(profile_player2.elo_classic)
+
         if turn == 'w':
             game.winner = game.player2
+            if game.mode == 'classic':
+                profile_player1.elo_classic -= 20
+                profile_player2.elo_classic += 20
+            elif game.mode == 'atomic':
+                profile_player1.elo_atomic -= 20
+                profile_player2.elo_atomic += 20
+            elif game.mode == 'antichess':
+                profile_player1.elo_antichess -= 20
+                profile_player2.elo_antichess += 20
         else:
             game.winner = game.player1
+            if game.mode == 'classic':
+                profile_player1.elo_classic += 20
+                profile_player2.elo_classic -= 20
+            elif game.mode == 'atomic':
+                profile_player1.elo_atomic += 20
+                profile_player2.elo_atomic -= 20
+            elif game.mode == 'antichess':
+                profile_player1.elo_antichess += 20
+                profile_player2.elo_antichess -= 20
+
         game.status = 'finished'
         game.save()
+        profile_player2.save()
+        profile_player1.save()
 
 
     def my_sync_save_draw(self):

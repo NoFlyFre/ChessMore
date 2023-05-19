@@ -1,25 +1,21 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from .forms import *
+from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from .models import *
-from django.http import HttpResponse
-import time
-from django.views import View
-from django.http import JsonResponse
-from .models import Game
-import json
-from django.db.models import Q
-from django.urls import reverse
 from django.views.decorators.cache import cache_control
-from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from .forms import *
+from .models import *
+import json
+import re
+
+
 
 def index(request):
     if request.user.is_authenticated:
         return redirect('multiplayer_chess:home')
     return redirect('multiplayer_chess:login')
+
 
 def loginView(request):
     if request.method == "POST":
@@ -31,8 +27,6 @@ def loginView(request):
             if user is not None:
                 login(request, user)
                 return redirect("multiplayer_chess:home")
-            else:
-                messages.error(request, "questo username è già stato preso; riprovare.")
         else:
             messages.error(request, "username o password errati; riprovare.")
     form = LoginForm()
@@ -48,19 +42,21 @@ def logoutView(request):
 def registerView(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
-        try:
+        if form.is_valid():
             user = form.save()
             Profile.objects.create(user=user)
             messages.success(request, "registrazione avvenuta con successo; adesso, acceda al suo profilo.")
             return redirect("multiplayer_chess:login")
-        except Exception as e:
-            messages.error(request, "qualcosa è andato storto durante la registrazione; riprovare.")
+        else:
+            html_error = form.errors.as_text()
+            new_html_error = re.sub(r'\*[^*]+\*', '', html_error).strip()
+            messages.error(request, f"qualcosa è andato storto durante la registrazione: {new_html_error}")
     form = RegisterForm()
     return render(request=request, template_name="multiplayer_chess/register.html", context={"register_form": form})
 
 
 @cache_control(no_cache=True, max_age=1)
-def home(request):
+def home(request):  
     if request.user.is_authenticated:
         return render(request=request, template_name='multiplayer_chess/home.html')
     elif 'username' in request.COOKIES and 'password' in request.COOKIES:
@@ -145,16 +141,45 @@ def chess_game(request, room_number, variant):
 
     profiles1 = Profile.objects.filter(user_id=game.player1)
     profiles2 = Profile.objects.filter(user_id=game.player2)
+    elo_player1 = 0
+    elo_player2 = 0
     if order == 1:
         profile1 = profiles1.first()
         username1 = game.player1.username
+        if variant == 'classic':
+            elo_player1 = profile1.elo_classic
+        elif variant == 'atomic':
+            elo_player1 = profile1.elo_atomic
+        elif variant == 'antichess':
+            elo_player1 = profile1.elo_antichess
+
         profile2 = profiles2.first()
         username2 = game.player2.username
+        if variant == 'classic':
+            elo_player2 = profile2.elo_classic
+        elif variant == 'atomic':
+            elo_player2 = profile2.elo_atomic
+        elif variant == 'antichess':
+            elo_player2 = profile2.elo_antichess
+
     else:
         profile1 = profiles2.first()
         username1 = game.player2.username
+        if variant == 'classic':
+            elo_player1 = profile1.elo_classic
+        elif variant == 'atomic':
+            elo_player1 = profile1.elo_atomic
+        elif variant == 'antichess':
+            elo_player1 = profile1.elo_antichess
+
         profile2 = profiles1.first()
         username2 = game.player1.username
+        if variant == 'classic':
+            elo_player2 = profile2.elo_classic
+        elif variant == 'atomic':
+            elo_player2 = profile2.elo_atomic
+        elif variant == 'antichess':
+            elo_player2 = profile2.elo_antichess
 
 
     ctx = {
@@ -163,11 +188,14 @@ def chess_game(request, room_number, variant):
         "room_number": room_number,
         'username': username1,
         'user_image': profile1.photo,
+        'user_elo1': elo_player1,
         'username2': username2,
         'user2_image': profile2.photo,
+        'user_elo2': elo_player2,
         'variant': variant,
     }
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
+
 
 def get_position(request, variant, room_number):
     # Get the position here
@@ -177,3 +205,4 @@ def get_position(request, variant, room_number):
     position = {'fen': fen, 'turn':turn}
     response_data = json.dumps(position)
     return HttpResponse(response_data, content_type='application/json')
+

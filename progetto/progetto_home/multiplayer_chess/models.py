@@ -1,10 +1,14 @@
 from django.db import models
 from django.conf import settings
+import json
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date_of_birth = models.DateField(blank=True, null=True)
     photo = models.ImageField(upload_to='users/%Y/%m/%d/', blank=True)
+    elo_classic = models.IntegerField(default=1000)
+    elo_atomic = models.IntegerField(default=1000)
+    elo_antichess = models.IntegerField(default=1000)
     def __str__(self):
         return f'Profile of {self.user.username}'
 
@@ -37,3 +41,4 @@ class Game(models.Model):
         ('finished','Partita terminata')
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='created')
+    elo_partita = models.IntegerField(null=True)
