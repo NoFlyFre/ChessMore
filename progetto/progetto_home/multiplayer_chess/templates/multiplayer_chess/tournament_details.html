@@ -1,0 +1,30 @@
+<h1>Tournament Details:</h1>
+
+<ul>
+    <li><strong>Name:</strong> {{ tournament_data.name }}</li>
+    <li><strong>Start Date:</strong> {{ tournament_data.start_date }}</li>
+    <li><strong>End Date:</strong> {{ tournament_data.end_date }}</li>
+</ul>
+
+<p><em>Players:</em></p>
+
+<ul>
+    {% for player in tournament_data.players %}
+        <li>{{ player }}</li>
+    {% empty %}
+        <li>No players yet.</li>
+    {% endfor %}
+</ul>
+
+<p>
+    {% if iscritto %}
+        <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
+    {% else %}
+        <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
+    {% endif %}
+</p>
+
+<p>
+    <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary">Back to the list</a>
+</p>
+

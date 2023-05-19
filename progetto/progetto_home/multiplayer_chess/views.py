@@ -8,6 +8,8 @@ from .forms import *
 from .models import *
 import json
 import re
+from django.urls import reverse
+
 
 
 
@@ -205,4 +207,54 @@ def get_position(request, variant, room_number):
     position = {'fen': fen, 'turn':turn}
     response_data = json.dumps(position)
     return HttpResponse(response_data, content_type='application/json')
+
+
+def tournament_list(request):
+    all_tournaments = ChessTournament.objects.all()
+    tournament_list = []
+    for tournament in all_tournaments:
+        tournament_dict = {
+            'id': tournament.pk,
+            'name': tournament.name,
+            'start_date': tournament.start_date.isoformat(),
+            'end_date': tournament.end_date.isoformat(),
+            'players': tournament.players.count(),
+            'variante': tournament.mode,
+            'tier': tournament.tier
+        }
+        tournament_list.append(tournament_dict)
+    return render(request, template_name="multiplayer_chess/tournament_list.html", context={'tournaments': tournament_list})
+
+
+def tournament_details(request, tour_id):
+    tournament = ChessTournament.objects.get(pk=tour_id)
+    players = [player.user.username for player in tournament.players.all()]
+
+    tournament_dict = {
+        'id': tournament.pk,
+        'name': tournament.name,
+        'start_date': tournament.start_date.isoformat(),
+        'end_date': tournament.end_date.isoformat(),
+        'players': players
+    }
+
+    if request.user.username in players:
+        iscritto = True
+    else:
+        iscritto = False
+    print(iscritto)
+    return render(request, template_name="multiplayer_chess/tournament_details.html", context={'tournament_data': tournament_dict , 'iscritto': iscritto})
+
+
+def tournament_unsubscribe(request, tour_id):
+    tournament = ChessTournament.objects.get(pk=tour_id)
+    player = Profile.objects.get(user=request.user)
+    tournament.players.remove(player)
+    return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
+
+def tournament_subscribe(request, tour_id):
+    tournament = ChessTournament.objects.get(pk=tour_id)
+    player = Profile.objects.get(user=request.user)
+    tournament.players.add(player)
+    return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
 

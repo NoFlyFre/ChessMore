@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tournament List</title>
+</head>
+<body>
+    <h1>Tournament List</h1>
+    <ul>
+        {% for tournament in tournaments %}
+            <li>
+                <a href="{% url 'multiplayer_chess:tournament_details' tour_id=tournament.id %}">
+                    <h2>{{ tournament.name }}</h2>
+                </a>
+                <p><strong>Variante:</strong> {{ tournament.variante }}</p>
+                <p><strong>Categoria:</strong> {{ tournament.tier }}</p>
+                <p><strong>Start date:</strong> {{ tournament.start_date }}</p>
+                <p><strong>End date:</strong> {{ tournament.end_date }}</p>
+                <p><strong>Number of players:</strong> {{ tournament.players }}</p>
+                
+            </li>
+        {% empty %}
+            <p>No tournaments found.</p>
+        {% endfor %}
+    </ul>
+
+    <p>
+        <a href="{% url 'multiplayer_chess:home'%}" role="button" class="btn btn-primary">Back to the home</a>
+    </p>
+
+</body>
+</html>

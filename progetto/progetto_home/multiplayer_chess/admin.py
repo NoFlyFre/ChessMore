@@ -7,3 +7,5 @@ class ProfileAdmin(admin.ModelAdmin):
     raw_id_fields = ['user']
 
 admin.site.register(Game)
+admin.site.register(ChessTournament)
+

@@ -42,3 +42,23 @@ class Game(models.Model):
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='created')
     elo_partita = models.IntegerField(null=True)
+
+
+class ChessTournament(models.Model):
+    name = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    players = models.ManyToManyField('Profile', related_name='tournaments')
+    MODE_CHOICES = [
+        ('classic', 'Classic'),
+        ('atomic', 'Atomic'),
+        ('antichess', 'Antichess'),
+    ]
+    mode = models.CharField(max_length=13, choices=MODE_CHOICES, null=True)
+    TIER_CHOICES = [
+        ('principiante', 'Principiante'),
+        ('intermedio', 'Intermedio'),
+        ('esperto', 'Esperto'),
+    ]
+    tier = models.CharField(max_length=13, choices=TIER_CHOICES, null=True)
+
