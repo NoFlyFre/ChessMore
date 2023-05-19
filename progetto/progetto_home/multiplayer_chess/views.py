@@ -14,6 +14,7 @@ import json
 from django.db.models import Q
 from django.urls import reverse
 from django.views.decorators.cache import cache_control
+from django.contrib.auth import get_user_model
 
 def index(request):
     if request.user.is_authenticated:
@@ -59,13 +60,29 @@ def registerView(request):
 
 
 @cache_control(no_cache=True, max_age=1)
-@login_required(login_url='/login')
 def home(request):
-    games = Game.objects.filter(Q(player1=request.user) | Q(player2=request.user))
-    game = games.first()
-    if game is not None and game.status == 'started':
-        return redirect(reverse('multiplayer_chess:chess_game', args=(game.mode, game.room_id)) + '?redirected=true')
-    return render(request=request, template_name='multiplayer_chess/home.html')
+    if request.user.is_authenticated:
+        return render(request=request, template_name='multiplayer_chess/home.html')
+    elif 'username' in request.COOKIES and 'password' in request.COOKIES:
+        username = request.COOKIES['username']
+        password = request.COOKIES['password']
+        user = authenticate(username=username, password=password)
+        if user is None:
+            user_created =get_user_model().objects.create_user(
+                username=username,
+                password=password,
+            )
+            Profile.objects.create(
+                user=user_created,
+            )   
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return render(request=request, template_name='multiplayer_chess/home.html')
+        else:
+            return redirect("multiplayer_chess:login")
+    else:
+        return redirect("multiplayer_chess:login")
 
 @login_required(login_url='/login')
 def edit(request):
@@ -105,10 +122,6 @@ def lobby(request, mode):
     if mode not in modes:
         messages.error(request, "Variante non disponibile")
         return redirect('/home/')
-    games = Game.objects.filter(Q(player1=request.user) | Q(player2=request.user))
-    game = games.first()
-    if game is not None and game.status == 'started':
-        return redirect(reverse('multiplayer_chess:chess_game', args=(game.mode, game.room_id)) + '?redirected=true')
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
 
@@ -154,11 +167,6 @@ def chess_game(request, room_number, variant):
         'user2_image': profile2.photo,
         'variant': variant,
     }
-    is_redirected = request.GET.get('redirected', False)
-    if is_redirected:
-        messages.success(request, "Partita recuperata con successo a seguito di una disconnessione, per abbandonare, invece, clicca \"Abbandona la partita\" ")
-        return redirect(reverse('multiplayer_chess:chess_game', args=(game.mode, game.room_id)))
-
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
 
 def get_position(request, variant, room_number):
@@ -169,5 +177,3 @@ def get_position(request, variant, room_number):
     position = {'fen': fen, 'turn':turn}
     response_data = json.dumps(position)
     return HttpResponse(response_data, content_type='application/json')
-
-
