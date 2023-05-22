@@ -123,7 +123,7 @@ def cronologia(request):
     cronologia2 = Game.objects.filter(player2=username)
     cronologia = (cronologia1 | cronologia2)
     cro_filtrata = FilterCronologia(request.GET, queryset=cronologia)
-    ctx = {'cronologia': cro_filtrata}
+    ctx = {'cronologia': cro_filtrata , 'username': username}
     return render(request, "multiplayer_chess/cronologia.html", ctx)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------

@@ -8,48 +8,67 @@
 {% block content %}
 <style>
     .container {
-        max-width: 1500px;
+        max-width: 1800px;
+        background-color: white;
+        border-radius: 20px; 
     }
-</style>
 
-<div class="row">
-    <div class="col-md">
-        <div class="card card-body">
-            <h5>Filtra partite effettuate</h5>
-            <form method="get">
-                {{cronologia.form}}
-                <button type="submit" class="btn btn-primary">
-                    <span class="glyphicon glyphicon-search"></span>Filtra
-                </button>
-            </form>
+    td {
+        color: black;
+    }
+    
+</style>    
+
+<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888;">
+    <div class="row">
+        <div class="col-md">
+            <div class="card card-body" style="border: none;">
+                <h5>Filtra partite effettuate</h5>
+                <form method="get">
+                    {{cronologia.form}}
+                    <button type="submit" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-search"></span>Filtra
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-md">
-        <div class="card card-body">
-            <form method="get">
-                <table class="table">
-                    <tr>
-                        <th>Giocatore 1</th>
-                        <th>Giocatore 2</th>
-                        <th>Data partita</th>
-                        <th>Modalità</th>
-                        <th>Vincitore</th>
-                    </tr>
-                {% for c in cronologia.qs %}
-                    <tr>
-                        <td>{{ c.player1 }}</td>
-                        <td>{{ c.player2 }}</td>
-                        <td>{{ c.data_partita}}</td>
-                        <td>{{ c.mode }}</td>
-                        <td>{{ c.winner }}</td>
-                    </tr>
-                {% endfor %}
-                </table>
+    <div class="row">
+        <div class="col-md">
+            <div class="card card-body mb-3 " style="border: none;">
+                <form method="get">
+                    <table class="table" style="border: 1px solid black;">
+                        <tr>
+                            <th>Giocatore 1</th>
+                            <th>Giocatore 2</th>
+                            <th>Data partita</th>
+                            <th>Modalità</th>
+                            <th>Vincitore</th>
+                        </tr>
+                    {% for c in cronologia.qs %}
+                        {% if username == c.winner %}
+                            <tr style="background-color: #9BFB60;">
+                                <td>{{ c.player1 }}</td>
+                                <td>{{ c.player2 }}</td>
+                                <td>{{ c.data_partita}}</td>
+                                <td>{{ c.mode }}</td>
+                                <td>{{ c.winner }}</td>
+                            </tr>
+                        {% else %}
+                            <tr style="background-color: #FF7777;">  <!-- #FA5757. -->
+                                <td>{{ c.player1 }}</td>
+                                <td>{{ c.player2 }}</td>    
+                                <td>{{ c.data_partita}}</td>
+                                <td>{{ c.mode }}</td>
+                                <td>{{ c.winner }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </table>
                 
-            </form>
+                </form>
             
+            </div>
         </div>
     </div>
 </div>
