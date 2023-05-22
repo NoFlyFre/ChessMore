@@ -200,6 +200,12 @@ class Lobby(AsyncWebsocketConsumer):
 #----------------------------------------------------------------------------------------------------------------
 
 class WSConsumerChess(AsyncWebsocketConsumer):
+    def obtain_players(self, room_id):
+        games = Game.objects.filter(room_id=room_id)
+        game = games.first()
+        player1 = game.player1.username
+        player2 = game.player2.username
+        return {'player1':player1,'player2':player2,'game':game}
 
     #
     def my_sync_save_fen_and_turn(self, fen, turn):
@@ -217,7 +223,7 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         return game.fen
     #
 
-    def my_sync_save_winner(self, turn):
+    def my_sync_save_winner(self, turn, quitPlayer):
         games = Game.objects.filter(pk=self.room_name)
         game = games.first()
         profile_player1 = Profile.objects.get(user=game.player1)
@@ -225,35 +231,42 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         print(profile_player1.elo_classic)
         print(profile_player2.elo_classic)
 
-        if turn == 'w':
-            game.winner = game.player2
-            if game.mode == 'classic':
-                profile_player1.elo_classic -= 20
-                profile_player2.elo_classic += 20
-            elif game.mode == 'atomic':
-                profile_player1.elo_atomic -= 20
-                profile_player2.elo_atomic += 20
-            elif game.mode == 'antichess':
-                profile_player1.elo_antichess -= 20
-                profile_player2.elo_antichess += 20
+        print(quitPlayer)
+        if quitPlayer == None:
+            if turn == 'w' :
+                game.winner = game.player2
+                if game.mode == 'classic':
+                    profile_player1.elo_classic -= 20
+                    profile_player2.elo_classic += 20
+                elif game.mode == 'atomic':
+                    profile_player1.elo_atomic -= 20
+                    profile_player2.elo_atomic += 20
+                elif game.mode == 'antichess':
+                    profile_player1.elo_antichess -= 20
+                    profile_player2.elo_antichess += 20
+            else:
+                game.winner = game.player1
+                if game.mode == 'classic':
+                    profile_player1.elo_classic += 20
+                    profile_player2.elo_classic -= 20
+                elif game.mode == 'atomic':
+                    profile_player1.elo_atomic += 20
+                    profile_player2.elo_atomic -= 20
+                elif game.mode == 'antichess':
+                    profile_player1.elo_antichess += 20
+                    profile_player2.elo_antichess -= 20
+            profile_player2.save()
+            profile_player1.save()
         else:
-            game.winner = game.player1
-            if game.mode == 'classic':
-                profile_player1.elo_classic += 20
-                profile_player2.elo_classic -= 20
-            elif game.mode == 'atomic':
-                profile_player1.elo_atomic += 20
-                profile_player2.elo_atomic -= 20
-            elif game.mode == 'antichess':
-                profile_player1.elo_antichess += 20
-                profile_player2.elo_antichess -= 20
-
+            print('sono qui')
+            if(quitPlayer == game.player1):
+                game.winner = game.player2
+            else:
+                game.winner = game.player1
         game.status = 'finished'
+        #print(game.winner)
         game.save()
-        profile_player2.save()
-        profile_player1.save()
-
-
+        
     def my_sync_save_draw(self):
         games = Game.objects.filter(pk=self.room_name)
         game = games.first()
@@ -295,6 +308,7 @@ class WSConsumerChess(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        players = await sync_to_async(self.obtain_players)(self.room_name)
 
         if(text_data_json['type'] == 'game_move'):
 
@@ -304,19 +318,18 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             status = game_logic.status(self.room_name)
             turn = game_logic.turn(self.room_name)
             if status == "checkmate":
-                await sync_to_async(self.my_sync_save_winner)(turn)
+                await sync_to_async(self.my_sync_save_winner)(turn, None)
             if status == "stalemate" or status == "var_draw" or status == "insufficient":
                 await sync_to_async(self.my_sync_save_draw)()
             if status == "var_loss":
                 if turn == 'w':
                     await sync_to_async(self.my_sync_save_winner)('b')
                 else:
-                    await sync_to_async(self.my_sync_save_winner)(turn)
+                    await sync_to_async(self.my_sync_save_winner)(turn, None)
             #
             await sync_to_async(self.my_sync_save_fen_and_turn)(fen, turn)
             #
 
-            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -328,10 +341,9 @@ class WSConsumerChess(AsyncWebsocketConsumer):
                     'result' : result,
                 }
             )
-        else:
+        elif(text_data_json['type'] == 'messaggio'):
             message = text_data_json['message']
             username = text_data_json['username']
-            #room = text_data_json['room']
             await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -340,6 +352,23 @@ class WSConsumerChess(AsyncWebsocketConsumer):
                 'username': username
             }
         )
+        else:
+            username = text_data_json['username']
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'abbandona',
+                    'username': username
+                }
+            )
+            if(players['player1'] == username):
+                print("Ha quittato il player: " + players['player1'])
+                await sync_to_async(self.my_sync_save_winner)('b', players['player1'])
+            else:
+                print("Ha quittato il player: " + players['player2'])
+                await sync_to_async(self.my_sync_save_winner)('w', players['player2'])
+            
+            #await sync_to_async(players['game'].save)()
 
     async def game_move(self, event):
 
@@ -371,6 +400,12 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             'type': 'messaggio'
         }))
 
+    async def abbandona(self, event):
+        username = event['username']
+        await self.send(text_data=json.dumps({
+            'username': username,
+            'type': 'abbandona'
+        }))
     async def connection_established(self, event):
         type = event["type"]
         # Send the message to the WebSocket

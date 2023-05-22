@@ -1,3 +1,9 @@
+{% load static %}
+{% block css %}
+<script type="text/javascript" src="jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="jquery.bracket.min.js"></script>
+<link rel="stylesheet" type="text/css" href="jquery.bracket.min.css" />
+{% endblock %}
 <h1>Tournament Details:</h1>
 
 <ul>
@@ -27,4 +33,6 @@
 <p>
     <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary">Back to the list</a>
 </p>
+
+
 

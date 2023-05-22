@@ -150,8 +150,9 @@
                     <input id="chat-message-submit" type="button" value="Invia" class="btn btn-success">
                 </div>
             </div>
-            <button type="button" id="myInput" class="btn btn-danger btn-lg mt-5" data-bs-toggle="modal"
-            data-bs-target="#modaleAbbandono">Abbandona la partita</button>
+            <!--button type="button" id="myInput" class="btn btn-danger btn-lg mt-5" data-bs-toggle="modal"
+            data-bs-target="#modaleAbbandono">Abbandona la partita</button-->
+            <button type="button" id="quit-btn" class="btn btn-danger btn-lg mt-5">Abbandona la partita</button>
     </div>
   </div>
 </div>
@@ -262,13 +263,66 @@
 
     socket.onmessage = function(e){
         const data = JSON.parse(e.data);
-        if(data.type == 'game_move'){
+
+        if(data.type == 'game_move')
+        {
             game_receive(data);
         }
-        else {
+        else if(data.type == 'messaggio'){
             message_receive(data);
         }
+        else if(data.type == 'abbandona'){
+            quit_receive(data);
+            socket.close();
+            board_block_replace();
+            modify_quit_btn();
+        }
     };
+
+    function board_block_replace(){
+        var oldBoardElement = document.getElementById('myBoard');
+        
+        var fen = board.fen(); // Ottieni la notazione FEN della posizione attuale
+        console.log(fen)
+        // Rimuovi l'elemento della scacchiera attuale
+        oldBoardElement.innerHTML = '';
+        
+        // Crea un nuovo elemento per la nuova scacchiera
+        var newBoardElement = document.createElement('div');
+        newBoardElement.id = 'newBoard';
+        newBoardElement.style.width = '500px';
+        newBoardElement.style.marginLeft = 'auto';
+        newBoardElement.style.marginRight = 'auto';
+        oldBoardElement.parentNode.replaceChild(newBoardElement, oldBoardElement);
+        
+        // Crea la nuova scacchiera con la configurazione desiderata e la posizione FEN
+        var newBoard = Chessboard('newBoard', {
+          orientation: orientation,
+          draggable: false,
+          pieceTheme: pieceTheme,
+          position: fen,
+          onDragStart: onDragStart,
+          onDrop: onDrop,
+          onSnapEnd: check_status
+        });
+    }
+
+    function modify_quit_btn() {
+        var quitBtn = document.getElementById('quit-btn');
+        quitBtn.style.backgroundColor = 'green';
+        quitBtn.style.border = '1px solid green';
+    
+        var homeLink = document.createElement('a');
+        homeLink.id = 'home_link';
+        homeLink.href = '/'; // Inserisci qui l'URL della home
+        homeLink.appendChild(document.createTextNode('Torna alla home'));
+    
+        var heading = document.createElement('h2');
+        heading.appendChild(homeLink);
+    
+        quitBtn.innerHTML = '';
+        quitBtn.appendChild(heading);
+    }
 
     function game_receive(data){
         game_status = data.status;
@@ -283,6 +337,14 @@
         }
         var div = document.createElement("div");
         div.innerHTML = data.username + ": " + data.message;
+        document.querySelector('#chat-message-container').appendChild(div);
+    }
+
+    function quit_receive(data){
+        console.log("l'utente ha abbandonato");
+        var div = document.createElement("div");
+        div.style.fontStyle = "italic";
+        div.innerHTML = data.username + " ha abbandonato la partita";
         document.querySelector('#chat-message-container').appendChild(div);
     }
 
@@ -319,13 +381,22 @@
         messageInputDom.value = '';
     }
 
-    $(document).ready(function () {
+    document.querySelector('#quit-btn').onclick = function(e){
+        const userName = JSON.parse(document.getElementById('username').textContent);
+        socket.send(JSON.stringify({
+            'username': userName,
+            'type': 'abbandona'
+        }))
+    }
+
+    //per ora commentata per avere le modifiche del tasto abbandona
+    /*$(document).ready(function () {
       $('#modalePromozione').modal('hide');
             $("#myInput").on("click", function () {
                 $('#modaleAbbandono').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
             });
-        });
+        });*/
 </script>
 {% endblock %}

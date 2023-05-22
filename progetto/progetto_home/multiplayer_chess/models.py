@@ -29,6 +29,7 @@ class Game(models.Model):
     ]
     mode = models.CharField(max_length=13, choices=MODE_CHOICES, null=True)
     fen = models.TextField(null=True, default='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    data_partita = models.DateTimeField(auto_now=True, null=True, blank=True) #auto_now permette di usare la data corrente nel momento che faccio game.save()
     TURN_CHOICES = [
         ('w', 'white'),
         ('b', 'black'),
@@ -42,6 +43,10 @@ class Game(models.Model):
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='created')
     elo_partita = models.IntegerField(null=True)
+    bracket_position = models.CharField(max_length=4, default = "", blank=True, null=True)
+    
+    class Meta: #modifico il comportamento del modello
+        ordering = ['-data_partita'] #ordino per data (il meno sepcifica l'ordine decrescente)
 
 
 class ChessTournament(models.Model):
@@ -55,10 +60,14 @@ class ChessTournament(models.Model):
         ('antichess', 'Antichess'),
     ]
     mode = models.CharField(max_length=13, choices=MODE_CHOICES, null=True)
+    
     TIER_CHOICES = [
         ('principiante', 'Principiante'),
         ('intermedio', 'Intermedio'),
         ('esperto', 'Esperto'),
     ]
     tier = models.CharField(max_length=13, choices=TIER_CHOICES, null=True)
+    
+    
 
+   

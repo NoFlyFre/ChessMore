@@ -16,6 +16,7 @@ urlpatterns = [
     path("lobby/<str:mode>/", views.lobby, name="lobby"),
     path("<str:variant>/<str:room_number>/", views.chess_game, name="chess_game"),
     path("<str:variant>/<str:room_number>/get_position/", views.get_position, name="get_position"),
+    path('cronologia/', views.cronologia, name='cronologia'),
     path("tournament-list/", views.tournament_list, name='tournament_list'),
     path("tournament/view/<str:tour_id>/", views.tournament_details, name='tournament_details'),
     path("tournament/view/<str:tour_id>/sub", views.tournament_subscribe, name='tournament_subscribe'),

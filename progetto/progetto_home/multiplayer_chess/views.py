@@ -6,18 +6,15 @@ from django.views.decorators.cache import cache_control
 from django.http import HttpResponse
 from .forms import *
 from .models import *
+from .filters import FilterCronologia
 import json
 import re
 from django.urls import reverse
-
-
-
 
 def index(request):
     if request.user.is_authenticated:
         return redirect('multiplayer_chess:home')
     return redirect('multiplayer_chess:login')
-
 
 def loginView(request):
     if request.method == "POST":
@@ -34,12 +31,10 @@ def loginView(request):
     form = LoginForm()
     return render(request=request, template_name="multiplayer_chess/login.html", context={"login_form": form})
 
-
 def logoutView(request):
     logout(request)
     messages.success(request, "hai eseguito il log-out con successo.")
     return redirect("multiplayer_chess:login")
-
 
 def registerView(request):
     if request.method == 'POST':
@@ -112,7 +107,6 @@ def my_password_change_view(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
 
-
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
 def lobby(request, mode):
@@ -122,6 +116,15 @@ def lobby(request, mode):
         return redirect('/home/')
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
+@login_required(login_url='/login')
+def cronologia(request):
+    username = request.user
+    cronologia1 = Game.objects.filter(player1=username)
+    cronologia2 = Game.objects.filter(player2=username)
+    cronologia = (cronologia1 | cronologia2)
+    cro_filtrata = FilterCronologia(request.GET, queryset=cronologia)
+    ctx = {'cronologia': cro_filtrata}
+    return render(request, "multiplayer_chess/cronologia.html", ctx)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 @cache_control(no_cache=True)
