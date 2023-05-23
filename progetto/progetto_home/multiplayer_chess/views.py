@@ -320,3 +320,47 @@ def leaderboard(request):
     }
 
     return render(request, template_name="multiplayer_chess/leaderboard.html", context=context)
+
+def tournament_details(request, tour_id):
+    tournament = ChessTournament.objects.get(pk=tour_id)
+    players = [player.user.username for player in tournament.players.all()]
+    playerss = [[game.player1.username, game.player2.username] for game in tournament.matches.all() if game.bracket_position == 'A']
+    results = { 'A': [], 'B':[], 'C': [], 'D': [] }
+
+    for game in tournament.matches.all():
+        if game.status != 'finished':
+            results[game.bracket_position].append([])
+        else:
+            if game.winner == game.player1:
+                results[game.bracket_position].append([1,0])
+            else:
+                results[game.bracket_position].append([0,1])
+    
+    results = list(results.values())
+    print(results)        
+
+
+    tournament_dict = {
+        'id': tournament.pk,
+        'name': tournament.name,
+        'start_date': tournament.start_date.isoformat(),
+        'end_date': tournament.end_date.isoformat(),
+        'players': players,
+        'matches': tournament.matches,
+        #'players_list': players_json
+    }
+
+    if request.user.username in players:
+        iscritto = True
+    else:
+        iscritto = False
+    print(iscritto)
+
+    context={
+        'tournament_data': tournament_dict ,
+        'iscritto': iscritto, 
+        'players_list': playerss,
+        'results': results
+        }
+    
+    return render(request, template_name="multiplayer_chess/tournament_details.html", context=context)

@@ -1,8 +1,10 @@
 {% load static %}
 {% block css %}
-<script type="text/javascript" src="jquery-1.6.2.min.js"></script>
-<script type="text/javascript" src="jquery.bracket.min.js"></script>
-<link rel="stylesheet" type="text/css" href="jquery.bracket.min.css" />
+<head>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script> 
+    <script type="text/javascript" src="https://www.aropupu.fi/bracket/jquery-bracket/dist/jquery.bracket.min.js"></script> 
+    <link rel="stylesheet" type="text/css" href="https://www.aropupu.fi/bracket/jquery-bracket/dist/jquery.bracket.min.css">
+</head>
 {% endblock %}
 <h1>Tournament Details:</h1>
 
@@ -20,6 +22,41 @@
     {% empty %}
         <li>No players yet.</li>
     {% endfor %}
+
+    <div id="minimal">
+        <!--script>
+             var players_array = [['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2']]; 
+             var results = [[0, 1], [1, 0], [1, 0], [1, 0], [1, 0], [], [1, 0], [1, 0], [], [], [], [], [], [], [], [], [], [1, 0], []];
+             console.log(players_array);
+             console.log(results)
+             var bigData = {
+                "teams":
+                [ // Matchups players_array ],
+                "results":
+                [ // List of brackets (single elimination, so only one bracket)
+                    [ // List of rounds in bracket // First round in this bracket results 
+                    ] 
+                ] 
+            } 
+             $(function() { $('div#minimal .demo').bracket({init: bigData}) }) 
+        </!--script-->
+        <script>
+            var players_array = {{players_list|safe}};
+            var results = {{results|safe}};
+            console.log(players_array);
+            console.log(results)
+            var bigData = {
+                "teams":       
+                    players_array,
+                "results": [            
+                    results
+                ]
+              }
+               
+              $(function() { $('div#minimal .demo').bracket({init: bigData}) })
+        </script>
+        <div class="demo"></div>
+    </div>
 </ul>
 
 <p>

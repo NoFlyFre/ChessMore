@@ -67,7 +67,14 @@ class ChessTournament(models.Model):
         ('esperto', 'Esperto'),
     ]
     tier = models.CharField(max_length=13, choices=TIER_CHOICES, null=True)
-    
-    
+    matches = models.ManyToManyField('Game', related_name='tournament')
+
+    STATUS_CHOICES = [
+        ('ottavi', 'Ottavi'),
+        ('quarti', 'Quarti'),
+        ('semifinale', 'Semifinale'),
+        ('finale', 'Finale')
+    ]
+    status = models.CharField(max_length=11, choices=STATUS_CHOICES, null=True)
 
    
