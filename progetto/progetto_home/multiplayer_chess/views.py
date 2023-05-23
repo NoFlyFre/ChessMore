@@ -10,6 +10,10 @@ from .filters import FilterCronologia
 import json
 import re
 from django.urls import reverse
+from django.db.models import Q
+from django.utils.html import format_html
+from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
 
 def index(request):
     if request.user.is_authenticated:
@@ -110,6 +114,24 @@ def my_password_change_view(request):
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
 def lobby(request, mode):
+    
+
+    partite_in_corso = Game.objects.filter(
+        Q(player1=request.user) | Q(player2=request.user),
+        status='started',
+    )
+    partita = partite_in_corso.first()
+    if partite_in_corso.count() > 0:
+        messages.error(
+            request, 
+            mark_safe(
+                'Non puoi iniziare una nuova partita se ne hai una ancora in corso. \
+                Clicca <a href="{}">qui</a> per continuare la tua partita.' \
+                .format(reverse_lazy('multiplayer_chess:chess_game', args=[partita.mode, partita.room_id])))
+            )
+        return redirect('/home/')
+
+
     modes = ('classic', 'atomic', 'antichess', 'kingofthehill', 'threecheck', 'horde', 'racingkings')
     if mode not in modes:
         messages.error(request, "Variante non disponibile")
@@ -261,3 +283,40 @@ def tournament_subscribe(request, tour_id):
     tournament.players.add(player)
     return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
 
+def leaderboard(request):
+    profiles = Profile.objects.all()
+    player = Profile.objects.get(user=request.user)
+
+    elo_values_classic = []
+    for profile in profiles:
+        elo_values_classic.append(profile.elo_classic)
+    elo_values_classic.sort(reverse=True)
+    classic_position = elo_values_classic.index(player.elo_classic)
+
+    elo_values_atomic = []
+    for profile in profiles:
+        elo_values_atomic.append(profile.elo_atomic)
+    elo_values_atomic.sort(reverse=True)
+    atomic_position = elo_values_atomic.index(player.elo_atomic)
+
+    elo_values_antichess = []
+    for profile in profiles:
+        elo_values_antichess.append(profile.elo_antichess)
+    elo_values_antichess.sort(reverse=True)
+    antichess_position = elo_values_antichess.index(player.elo_antichess)
+
+
+    context = {
+        'profiles': profiles,
+
+        'elo_classic': player.elo_classic,
+        'classic_position': classic_position + 1,
+
+        'elo_atomic': player.elo_atomic,
+        'atomic_position' : atomic_position + 1,
+
+        'elo_antichess': player.elo_antichess,
+        'antichess_position' : antichess_position + 1,
+    }
+
+    return render(request, template_name="multiplayer_chess/leaderboard.html", context=context)

@@ -20,7 +20,8 @@ urlpatterns = [
     path("tournament-list/", views.tournament_list, name='tournament_list'),
     path("tournament/view/<str:tour_id>/", views.tournament_details, name='tournament_details'),
     path("tournament/view/<str:tour_id>/sub", views.tournament_subscribe, name='tournament_subscribe'),
-    path("tournament/view/<str:tour_id>/unsub", views.tournament_unsubscribe, name='tournament_unsubscribe')
+    path("tournament/view/<str:tour_id>/unsub", views.tournament_unsubscribe, name='tournament_unsubscribe'),
+    path("leaderboard/", views.leaderboard, name="leaderboard"),
     #----------------------------------------------------------------------------------------------------
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

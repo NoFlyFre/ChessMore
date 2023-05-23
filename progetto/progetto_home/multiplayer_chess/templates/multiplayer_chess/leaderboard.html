@@ -1,0 +1,142 @@
+{% extends 'multiplayer_chess/base.html' %}
+{% load static %}
+
+{% block navbar %}
+    {% include 'multiplayer_chess/navbar.html' %}
+{% endblock %}
+
+
+
+{% block content %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.1/js/jquery.dataTables.min.js"></script>
+
+
+
+<style>
+    .container {
+        max-width: 1400px;
+        background-color: white;
+        border-radius: 20px; 
+    }
+
+    td {
+        color: black;
+    }
+
+    th.selected {
+        background-color: #E9E9E9;
+    }
+    
+</style> 
+
+<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888;">
+
+    <div class="row">
+        <div class="col-md" >
+            <div class="card card-body" style="border: none;">
+                <table id="YourInfoTable" class="table" >
+                    <thead>
+                        <tr>
+                            <th style="width: 27.5%">Modalità</th>
+                            <th style="width: 22%">Elo</th>
+                            <th>Posizione</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        <tr>
+                            <td>Scacchi classici</td>
+                            <td>{{ elo_classic }}</td>
+                            <td>{{ classic_position }}</td>
+                        </tr>
+                        <tr>
+                            <td>Scacchi atomici</td>
+                            <td>{{ elo_atomic }}</td>
+                            <td>{{ atomic_position }}</td>
+                        </tr>
+                        <tr>
+                            <td>Scacchi antichess</td>
+                            <td>{{ elo_antichess }}</td>
+                            <td>{{ antichess_position }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>  
+        </div>          
+    </div>
+
+    <div class="row">
+        <div class="col-md" >
+            <div class="card card-body mb-1 " style="border: none;">
+                <form method="get">
+                    
+
+                    <div class="table-responsive" >
+                        <table id="myTable" class="table" >
+                            <thead>
+                                <tr>
+                                    <th class="not-selectable">Username</th>
+                                    <th class="selected">Classic Elo</th>
+                                    <th>Atomic Elo</th>
+                                    <th>Antichess Elo</th>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                {% for profile in profiles %}
+                                    <tr>
+                                        <td>{{ profile.user }}</td>
+                                        <td>{{ profile.elo_classic }}</td>
+                                        <td>{{ profile.elo_atomic }}</td>
+                                        <td>{{ profile.elo_antichess }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                
+                </form>
+            
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">  
+    $.noConflict();
+    jQuery(document).ready(function($) {
+        $('#myTable').DataTable({
+            "order": [[ 1, "desc" ]],
+            "ordering": true,
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "columnDefs": [{
+                "targets": [ 1, 2, 3 ],
+                "orderable": true,
+                "orderSequence": ["desc"]
+            },{
+                "targets": [0],
+                "orderable": false
+            }]
+        });
+
+        $('#myTable thead').on('click', 'th:not(.not-selectable)', function () {
+            if ($(this).hasClass('selected')) {
+                return;
+            } else {
+                $('th.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+
+
+    });
+
+
+
+</script>
+
+{% endblock %}
+
+

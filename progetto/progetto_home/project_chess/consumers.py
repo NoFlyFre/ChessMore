@@ -216,12 +216,10 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         game.save()
     #
 
-    #
     def my_sync_retrive_fen(self):
         games = Game.objects.filter(pk=self.room_name)
         game = games.first()
         return game.fen
-    #
 
     def my_sync_save_winner(self, turn, quitPlayer):
         games = Game.objects.filter(pk=self.room_name)
