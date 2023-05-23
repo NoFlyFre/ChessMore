@@ -95,10 +95,11 @@ class Lobby(AsyncWebsocketConsumer):
         )
 
         self.rounded_elo = await sync_to_async(self.my_sync_get_elo_mode)(self.mode)
-        print(self.rounded_elo)
+        print('Self rounded ELO: ', self.rounded_elo)
 
         #ricava gli utenti nella lobby in attesa per una determinata variante e con un determinato elo
         users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
+
         
         #se l'utente non è gia connesso per quella determinata variante imposta il
         #flag firstConnection a true
@@ -229,38 +230,40 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         print(profile_player1.elo_classic)
         print(profile_player2.elo_classic)
 
-        print(quitPlayer)
-        if quitPlayer == None:
-            if turn == 'w' :
-                game.winner = game.player2
-                if game.mode == 'classic':
-                    profile_player1.elo_classic -= 20
-                    profile_player2.elo_classic += 20
-                elif game.mode == 'atomic':
-                    profile_player1.elo_atomic -= 20
-                    profile_player2.elo_atomic += 20
-                elif game.mode == 'antichess':
-                    profile_player1.elo_antichess -= 20
-                    profile_player2.elo_antichess += 20
-            else:
-                game.winner = game.player1
-                if game.mode == 'classic':
-                    profile_player1.elo_classic += 20
-                    profile_player2.elo_classic -= 20
-                elif game.mode == 'atomic':
-                    profile_player1.elo_atomic += 20
-                    profile_player2.elo_atomic -= 20
-                elif game.mode == 'antichess':
-                    profile_player1.elo_antichess += 20
-                    profile_player2.elo_antichess -= 20
-            profile_player2.save()
-            profile_player1.save()
-        else:
+        if quitPlayer != None:
             print('sono qui')
             if(quitPlayer == game.player1):
                 game.winner = game.player2
             else:
                 game.winner = game.player1
+
+        print(quitPlayer)
+        
+        if turn == 'w' :
+            game.winner = game.player2
+            if game.mode == 'classic':
+                profile_player1.elo_classic -= 7
+                profile_player2.elo_classic += 7
+            elif game.mode == 'atomic':
+                profile_player1.elo_atomic -= 7
+                profile_player2.elo_atomic += 7
+            elif game.mode == 'antichess':
+                profile_player1.elo_antichess -= 7
+                profile_player2.elo_antichess += 7
+        else:
+            game.winner = game.player1
+            if game.mode == 'classic':
+                profile_player1.elo_classic += 7
+                profile_player2.elo_classic -= 7
+            elif game.mode == 'atomic':
+                profile_player1.elo_atomic += 7
+                profile_player2.elo_atomic -= 7
+            elif game.mode == 'antichess':
+                profile_player1.elo_antichess += 7
+                profile_player2.elo_antichess -= 7
+        profile_player2.save()
+        profile_player1.save()
+        
         game.status = 'finished'
         #print(game.winner)
         game.save()
