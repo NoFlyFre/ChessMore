@@ -11,7 +11,6 @@ import json
 import re
 from django.urls import reverse
 from django.db.models import Q
-from django.utils.html import format_html
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 
@@ -240,8 +239,8 @@ def tournament_list(request):
         tournament_dict = {
             'id': tournament.pk,
             'name': tournament.name,
-            'start_date': tournament.start_date.isoformat(),
-            'end_date': tournament.end_date.isoformat(),
+            'start_date': tournament.start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+            'end_date': tournament.end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
             'players': tournament.players.count(),
             'variante': tournament.mode,
             'tier': tournament.tier
@@ -249,35 +248,20 @@ def tournament_list(request):
         tournament_list.append(tournament_dict)
     return render(request, template_name="multiplayer_chess/tournament_list.html", context={'tournaments': tournament_list})
 
-
-def tournament_details(request, tour_id):
-    tournament = ChessTournament.objects.get(pk=tour_id)
-    players = [player.user.username for player in tournament.players.all()]
-
-    tournament_dict = {
-        'id': tournament.pk,
-        'name': tournament.name,
-        'start_date': tournament.start_date.isoformat(),
-        'end_date': tournament.end_date.isoformat(),
-        'players': players
-    }
-
-    if request.user.username in players:
-        iscritto = True
-    else:
-        iscritto = False
-    print(iscritto)
-    return render(request, template_name="multiplayer_chess/tournament_details.html", context={'tournament_data': tournament_dict , 'iscritto': iscritto})
-
-
 def tournament_unsubscribe(request, tour_id):
     tournament = ChessTournament.objects.get(pk=tour_id)
+    if tournament.status != 'iscrizione':
+        messages.error(request, "Iscrizioni chiuse")
+        return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
     player = Profile.objects.get(user=request.user)
     tournament.players.remove(player)
     return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
 
 def tournament_subscribe(request, tour_id):
     tournament = ChessTournament.objects.get(pk=tour_id)
+    if tournament.status != 'iscrizione':
+        messages.error(request, "Iscrizioni chiuse")
+        return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
     player = Profile.objects.get(user=request.user)
     tournament.players.add(player)
     return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
@@ -320,7 +304,11 @@ def leaderboard(request):
 
     return render(request, template_name="multiplayer_chess/leaderboard.html", context=context)
 
+
+
+
 def tournament_details(request, tour_id):
+    
     tournament = ChessTournament.objects.get(pk=tour_id)
     players = [player.user.username for player in tournament.players.all()]
     playerss = [[game.player1.username, game.player2.username] for game in tournament.matches.all() if game.bracket_position == 'A']
@@ -342,8 +330,8 @@ def tournament_details(request, tour_id):
     tournament_dict = {
         'id': tournament.pk,
         'name': tournament.name,
-        'start_date': tournament.start_date.isoformat(),
-        'end_date': tournament.end_date.isoformat(),
+        'start_date': tournament.start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+        'end_date': tournament.end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
         'players': players,
         'matches': tournament.matches,
         #'players_list': players_json

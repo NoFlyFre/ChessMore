@@ -1,6 +1,18 @@
 from django.db import models
 from django.conf import settings
 import json
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import schedule
+import time
+from django.utils import timezone
+import pytz
+import threading
+import datetime
+from django.contrib.auth.models import User
+from django.db .models import Max
+import random
+
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -51,9 +63,9 @@ class Game(models.Model):
 
 class ChessTournament(models.Model):
     name = models.CharField(max_length=100)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    players = models.ManyToManyField('Profile', related_name='tournaments')
+    start_datetime = models.DateTimeField(null=True)
+    end_datetime = models.DateTimeField(null=True)
+    players = models.ManyToManyField('Profile', related_name='tournaments', blank=True)
     MODE_CHOICES = [
         ('classic', 'Classic'),
         ('atomic', 'Atomic'),
@@ -67,9 +79,10 @@ class ChessTournament(models.Model):
         ('esperto', 'Esperto'),
     ]
     tier = models.CharField(max_length=13, choices=TIER_CHOICES, null=True)
-    matches = models.ManyToManyField('Game', related_name='tournament')
+    matches = models.ManyToManyField('Game', related_name='tournament', blank=True)
 
     STATUS_CHOICES = [
+        ('iscrizione', 'Iscrizioni'),
         ('ottavi', 'Ottavi'),
         ('quarti', 'Quarti'),
         ('semifinale', 'Semifinale'),
@@ -77,4 +90,59 @@ class ChessTournament(models.Model):
     ]
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, null=True)
 
-   
+
+
+
+def crea_partite_semifinale(instance):
+    instance.status = 'semifinale'
+    player_list = list(instance.players.all())
+    max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
+    print(player_list)
+
+    player1 = random.choice(player_list)
+    player_list.remove(player1)
+    player2 = random.choice(player_list)
+    player_list.remove(player2)
+
+    game1 = Game.objects.create(
+        player1= player1.user,
+        player2= player2.user,
+        room_id = max_id + 1,
+        mode = 'classic', 
+        status = 'started',
+        bracket_position = 'A'
+    )
+
+    max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
+    player1 = random.choice(player_list)
+    player_list.remove(player1)
+    player2 = random.choice(player_list)
+    player_list.remove(player2)
+    
+    game2 = Game.objects.create(
+        player1= player1.user,
+        player2= player2.user,
+        room_id = max_id + 1,
+        mode = 'classic', 
+        status = 'started',
+        bracket_position = 'A'
+    )
+    instance.matches.add(game1)
+    instance.matches.add(game2)
+    
+    instance.save()
+
+def run_schedule(time_start, instance):
+    schedule.every().day.at(time_start).do(crea_partite_semifinale, instance)
+    while True:
+        schedule.run_pending()
+        #print(schedule.jobs) 
+        time.sleep(10)
+
+@receiver(post_save, sender=ChessTournament)
+def create_tournament(sender, instance, created, **kwargs):
+    if created:
+        time_start = (instance.start_datetime + datetime.timedelta(hours=2)).strftime('%H:%M:%S')
+        scheduler_thread = threading.Thread(target=run_schedule, args=(time_start,instance,))
+        scheduler_thread.start()
+        print(timezone.now())

@@ -1,4 +1,10 @@
+{% extends 'multiplayer_chess/base.html' %}
 {% load static %}
+
+{% block navbar %}
+    {% include 'multiplayer_chess/navbar.html' %}
+{% endblock %}
+
 {% block css %}
 <head>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script> 
@@ -6,70 +12,106 @@
     <link rel="stylesheet" type="text/css" href="https://www.aropupu.fi/bracket/jquery-bracket/dist/jquery.bracket.min.css">
 </head>
 {% endblock %}
-<h1>Tournament Details:</h1>
 
-<ul>
-    <li><strong>Name:</strong> {{ tournament_data.name }}</li>
-    <li><strong>Start Date:</strong> {{ tournament_data.start_date }}</li>
-    <li><strong>End Date:</strong> {{ tournament_data.end_date }}</li>
-</ul>
 
-<p><em>Players:</em></p>
+{% block content %}
 
-<ul>
-    {% for player in tournament_data.players %}
-        <li>{{ player }}</li>
-    {% empty %}
-        <li>No players yet.</li>
-    {% endfor %}
-
-    <div id="minimal">
-        <!--script>
-             var players_array = [['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2']]; 
-             var results = [[0, 1], [1, 0], [1, 0], [1, 0], [1, 0], [], [1, 0], [1, 0], [], [], [], [], [], [], [], [], [], [1, 0], []];
-             console.log(players_array);
-             console.log(results)
-             var bigData = {
-                "teams":
-                [ // Matchups players_array ],
-                "results":
-                [ // List of brackets (single elimination, so only one bracket)
-                    [ // List of rounds in bracket // First round in this bracket results 
-                    ] 
-                ] 
-            } 
-             $(function() { $('div#minimal .demo').bracket({init: bigData}) }) 
-        </!--script-->
-        <script>
-            var players_array = {{players_list|safe}};
-            var results = {{results|safe}};
-            console.log(players_array);
-            console.log(results)
-            var bigData = {
-                "teams":       
-                    players_array,
-                "results": [            
-                    results
-                ]
-              }
-               
-              $(function() { $('div#minimal .demo').bracket({init: bigData}) })
-        </script>
-        <div class="demo"></div>
-    </div>
-</ul>
-
-<p>
-    {% if iscritto %}
-        <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
-    {% else %}
-        <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                {{ message }}
+            </div>
+            {% elif message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                {{ message }}
+            </div>
+            {% endif %}
+        {% endfor %}
     {% endif %}
-</p>
+    
 
-<p>
-    <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary">Back to the list</a>
-</p>
+<style>
+    .container {
+        max-width: 1400px;
+        background-color: white;
+        border-radius: 20px; 
+    }
+</style> 
 
+<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888;">
+    <h1>Tournament Details:</h1>
+
+    <ul>
+        <li><strong>Name:</strong> {{ tournament_data.name }}</li>
+        <li><strong>Start Date:</strong> {{ tournament_data.start_date }}</li>
+        <li><strong>End Date:</strong> {{ tournament_data.end_date }}</li>
+    </ul>
+
+    <p><em>Players:</em></p>
+
+    <ul>
+        {% for player in tournament_data.players %}
+            <li>{{ player }}</li>
+        {% empty %}
+            <li>No players yet.</li>
+        {% endfor %}
+
+        <div id="minimal">
+            <!--script>
+                var players_array = [['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2']]; 
+                var results = [[0, 1], [1, 0], [1, 0], [1, 0], [1, 0], [], [1, 0], [1, 0], [], [], [], [], [], [], [], [], [], [1, 0], []];
+                console.log(players_array);
+                console.log(results)
+                var bigData = {
+                    "teams":
+                    [ // Matchups players_array ],
+                    "results":
+                    [ // List of brackets (single elimination, so only one bracket)
+                        [ // List of rounds in bracket // First round in this bracket results 
+                        ] 
+                    ] 
+                } 
+                $(function() { $('div#minimal .demo').bracket({init: bigData}) }) 
+            </!--script-->
+            <script>
+                var players_array = {{players_list|safe}};
+                var results = {{results|safe}};
+                console.log(players_array);
+                console.log(results)
+                var bigData = {
+                    "teams":       
+                        players_array,
+                    "results": [            
+                        results
+                    ]
+                }
+
+                $.noConflict();
+                jQuery(function($) {
+                    $('div#minimal .demo').bracket({init: bigData});
+                });//skipConsolationRound: true
+
+            </script>
+            <div class="demo"></div>
+        </div>
+    </ul>
+
+    <p>
+        {% if iscritto %}
+            <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
+        {% else %}
+            <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
+        {% endif %}
+    </p>
+
+    <p>
+        <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary mb-2">Back to the list</a>
+    </p>
+</div>
+{% endblock %}
 
 
