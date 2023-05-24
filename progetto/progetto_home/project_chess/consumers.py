@@ -51,7 +51,10 @@ class Lobby(AsyncWebsocketConsumer):
 
 
     def my_sync_aggiungi_secondo_player(self, user, mode_parameter, elo):
-        games = Game.objects.filter(player2__isnull=True, mode=mode_parameter, elo_partita = elo )
+        games = None
+        while games is None:
+            games = Game.objects.filter(player2__isnull=True, mode=mode_parameter, elo_partita = elo )
+
         game = games.first()
         game.player2 = user
         game.status = 'started'
@@ -222,6 +225,7 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         game = games.first()
         return game.fen
 
+    '''
     def my_sync_save_winner(self, turn, quitPlayer):
         games = Game.objects.filter(pk=self.room_name)
         game = games.first()
@@ -230,16 +234,52 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         print(profile_player1.elo_classic)
         print(profile_player2.elo_classic)
 
-        if quitPlayer != None:
-            print('sono qui')
+        if quitPlayer == None:
+            if turn == 'w' :
+                game.winner = game.player2
+                if game.mode == 'classic':
+                    profile_player1.elo_classic -= 7
+                    profile_player2.elo_classic += 7
+                elif game.mode == 'atomic':
+                    profile_player1.elo_atomic -= 7
+                    profile_player2.elo_atomic += 7
+                elif game.mode == 'antichess':
+                    profile_player1.elo_antichess -= 7
+                    profile_player2.elo_antichess += 7
+            else:
+                game.winner = game.player1
+                if game.mode == 'classic':
+                    profile_player1.elo_classic += 7
+                    profile_player2.elo_classic -= 7
+                elif game.mode == 'atomic':
+                    profile_player1.elo_atomic += 7
+                    profile_player2.elo_atomic -= 7
+                elif game.mode == 'antichess':
+                    profile_player1.elo_antichess += 7
+                    profile_player2.elo_antichess -= 7
+            profile_player2.save()
+            profile_player1.save()
+        else:
             if(quitPlayer == game.player1):
                 game.winner = game.player2
             else:
                 game.winner = game.player1
-
-        print(quitPlayer)
+    
+        game.status = 'finished'
+        #print(game.winner)
+        game.save()
         
-        if turn == 'w' :
+        profile_player2.save()
+        profile_player1.save()
+    '''
+    
+    def my_sync_save_winner(self, turn, quitPlayer):
+        games = Game.objects.filter(pk=self.room_name)
+        game = games.first()
+        profile_player1 = Profile.objects.get(user=game.player1)
+        profile_player2 = Profile.objects.get(user=game.player2)
+
+        if quitPlayer == game.player1.username or turn == 'w':
             game.winner = game.player2
             if game.mode == 'classic':
                 profile_player1.elo_classic -= 7
@@ -250,20 +290,22 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             elif game.mode == 'antichess':
                 profile_player1.elo_antichess -= 7
                 profile_player2.elo_antichess += 7
-        else:
+
+        elif quitPlayer == game.player2.username or turn == 'b':
             game.winner = game.player1
             if game.mode == 'classic':
-                profile_player1.elo_classic += 7
                 profile_player2.elo_classic -= 7
+                profile_player1.elo_classic += 7
             elif game.mode == 'atomic':
-                profile_player1.elo_atomic += 7
                 profile_player2.elo_atomic -= 7
+                profile_player1.elo_atomic += 7
             elif game.mode == 'antichess':
-                profile_player1.elo_antichess += 7
                 profile_player2.elo_antichess -= 7
+                profile_player1.elo_antichess += 7
+
         profile_player2.save()
         profile_player1.save()
-        
+
         game.status = 'finished'
         #print(game.winner)
         game.save()
