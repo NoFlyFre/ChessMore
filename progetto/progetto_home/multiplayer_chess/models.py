@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 from django.db .models import Max
 import random
 
+scheduler_thread = None
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -86,63 +87,216 @@ class ChessTournament(models.Model):
         ('ottavi', 'Ottavi'),
         ('quarti', 'Quarti'),
         ('semifinale', 'Semifinale'),
-        ('finale', 'Finale')
+        ('finale', 'Finale'),
+        ('terminato', 'Terminato')
     ]
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, null=True)
+
+def crea_partite_ottavi(instance):
+    global scheduler_thread
+
+    instance.status = 'ottavi'
+    player_list = list(instance.players.all())
+    print(player_list)
+
+    for i in range(8):
+        
+        max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
+
+        player1 = random.choice(player_list)
+        player_list.remove(player1)
+        player2 = random.choice(player_list)
+        player_list.remove(player2)
+
+        game = Game.objects.create(
+            player1= player1.user,
+            player2= player2.user,
+            room_id = max_id + 1,
+            mode = 'classic', 
+            status = 'started',
+            bracket_position = 'A'
+        )
+
+        instance.matches.add(game)
+        instance.save()
+
+    if scheduler_thread is not None:
+        scheduler_thread.cancel()
+
+        # Crea un nuovo thread
+        scheduler_thread = threading.Thread(target=run_schedule_ottavi, args=(instance,))
+        scheduler_thread.start()
+
+
+
+
+def crea_partite_quarti(instance):
+    instance.status = 'quarti'
+    game_list = list(instance.matches.filter(bracket_position='A'))
+    player_list = list([game.winner] for game in game_list)
+    print(player_list)
+
+    for i in range(4):
+        
+        max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
+
+        player1 = player_list.pop()
+        player2 = player_list.pop()
+
+        game = Game.objects.create(
+            player1= player1.user,
+            player2= player2.user,
+            room_id = max_id + 1,
+            mode = instance.mode, 
+            status = 'started',
+            bracket_position = 'B'
+        )
+
+        instance.match.add(game)
+
+    instance.save()
+
+    if scheduler_thread is not None:
+        scheduler_thread.cancel()
+
+        # Crea un nuovo thread
+        scheduler_thread = threading.Thread(target=run_schedule_quarti, args=(instance,))
+        scheduler_thread.start()
 
 
 
 
 def crea_partite_semifinale(instance):
     instance.status = 'semifinale'
-    player_list = list(instance.players.all())
+    game_list = list(instance.matches.filter(bracket_position='B'))
+    player_list = list([game.winner] for game in game_list)
+    print(player_list)
+
+    for i in range(2):
+
+        max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
+
+        player1 = player_list.pop()
+        player2 = player_list.pop()
+
+        game = Game.objects.create(
+            player1= player1.user,
+            player2= player2.user,
+            room_id = max_id + 1,
+            mode = instance.mode, 
+            status = 'started',
+            bracket_position = 'C'
+        )
+
+        instance.match.add(game)
+
+    instance.save()
+
+    if scheduler_thread is not None:
+        scheduler_thread.cancel()
+
+        # Crea un nuovo thread
+        scheduler_thread = threading.Thread(target=run_schedule_semifinale, args=(instance,))
+        scheduler_thread.start()
+
+
+
+def crea_partita_finale(instance):
+    instance.status = 'finale'
+    game_list = list(instance.matches.filter(bracket_position='C'))
+    player_list = list([game.winner] for game in game_list)
     max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
     print(player_list)
 
-    player1 = random.choice(player_list)
-    player_list.remove(player1)
-    player2 = random.choice(player_list)
-    player_list.remove(player2)
+    player1 = player_list.pop()
+    player2 = player_list.pop()
 
-    game1 = Game.objects.create(
+    game = Game.objects.create(
         player1= player1.user,
         player2= player2.user,
         room_id = max_id + 1,
-        mode = 'classic', 
+        mode = instance.mode, 
         status = 'started',
-        bracket_position = 'A'
+        bracket_position = 'D'
     )
 
-    max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
-    player1 = random.choice(player_list)
-    player_list.remove(player1)
-    player2 = random.choice(player_list)
-    player_list.remove(player2)
-    
-    game2 = Game.objects.create(
-        player1= player1.user,
-        player2= player2.user,
-        room_id = max_id + 1,
-        mode = 'classic', 
-        status = 'started',
-        bracket_position = 'A'
-    )
-    instance.matches.add(game1)
-    instance.matches.add(game2)
-    
+    instance.match.add(game)
     instance.save()
 
-def run_schedule(time_start, instance):
-    schedule.every().day.at(time_start).do(crea_partite_semifinale, instance)
+    if scheduler_thread is not None:
+        scheduler_thread.cancel()
+
+        # Crea un nuovo thread
+        scheduler_thread = threading.Thread(target=run_schedule_finale, args=(instance,))
+        scheduler_thread.start()
+
+
+def run_schedule_start(time_start, instance):
+    schedule.every().day.at(time_start).do(crea_partite_ottavi, instance)
     while True:
         schedule.run_pending()
         #print(schedule.jobs) 
         time.sleep(10)
 
+
+def run_schedule_ottavi(instance):
+    global scheduler_thread  # Utilizziamo la variabile globale per il thread
+    while True:
+        game_list = list(instance.matches.filter(bracket_position='A'))
+        games_status = list(game.status for game in game_list)
+        all_finished = all(status == 'finished' for status in games_status)
+        time.sleep(10)
+
+        if all_finished:
+            crea_partite_quarti(instance) 
+
+def run_schedule_quarti(instance):
+    while True:
+        game_list = list(instance.matches.filter(bracket_position='B'))
+        games_status = list(game.status for game in game_list)
+        all_finished = all(status == 'finished' for status in games_status)
+        time.sleep(10)
+
+        if all_finished:
+            crea_partite_semifinale(instance)  
+
+def run_schedule_semifinale(instance):
+    while True:
+        game_list = list(instance.matches.filter(bracket_position='C'))
+        games_status = list(game.status for game in game_list)
+        all_finished = all(status == 'finished' for status in games_status)
+        time.sleep(10)
+
+        if all_finished:
+            crea_partita_finale(instance)      
+
+
+def run_schedule_finale(instance):
+    while True:
+        game_list = list(instance.matches.filter(bracket_position='D'))
+        games_status = list(game.status for game in game_list)
+        all_finished = all(status == 'finished' for status in games_status)
+        time.sleep(10)
+
+        if all_finished:
+            instance.status = 'finished' 
+            scheduler_thread.cancel()
+
+
 @receiver(post_save, sender=ChessTournament)
 def create_tournament(sender, instance, created, **kwargs):
+    global scheduler_thread  # Utilizziamo la variabile globale per il thread
+
     if created:
         time_start = (instance.start_datetime + datetime.timedelta(hours=2)).strftime('%H:%M:%S')
-        scheduler_thread = threading.Thread(target=run_schedule, args=(time_start,instance,))
+
+        # Termina il thread esistente se presente
+        if scheduler_thread is not None:
+            scheduler_thread.cancel()
+
+        # Crea un nuovo thread
+        scheduler_thread = threading.Thread(target=run_schedule_start, args=(time_start, instance, scheduler_thread))
         scheduler_thread.start()
+
         print(timezone.now())
+
