@@ -1,103 +1,13 @@
 {% extends 'multiplayer_chess/base_for_classic_chess.html' %}
 
 {%block head %}
-<style>
-    a {
-        text-decoration: none;
-        color: inherit !important;
-    }
-
-    .move{
-        display: flex;
-    }
-
-    .move .intern_div{
-        padding-left: 10px;
-        width: 70px;
-    }
-
-    .input::placeholder{
-        color: #3e3e3e !important;
-        opacity: 1;
-    }
-
-    ::-moz-placeholder{
-        color: white;
-        opacity: 1;
-    }
-
-    .img-thumbnail{
-        width: 65px;
-        height: 65px;
-        background-color: #212529;
-        border-color: #3e3e3e;
-    }
-
-    .wrapper{
-        width: 90%;
-        margin: auto;
-        height: auto;
-        display: flex;
-    }
-
-    .column{
-        float: left;
-    }
-    .left{
-        width: 30%
-    }
-    .middle{
-        width: 40%;
-    }
-    .right{
-        width: 30%
-    }
-    .row:after{
-        content: "";
-        display: table;
-        clear: both;
-    }
-    .input{
-        color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
-    }
-    .grid-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Two columns with equal width */
-    }
-
-    .column-1 {
-        background-color: #ccc;
-    }
-
-    .column-2 {
-        background-color: #eee;
-    }
-
-    #move-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Two columns with equal width */
-    }
-
-    #move-container p {
-        background-color: #ccc;
-        margin: 0;
-        padding: 10px;
-    }
-
-    #move-container span {
-        color: white;
-    }
-
-    #home_link {
-        display: inline-block; 
-        width: 500px; 
-    }
-</style>
-
 {% load static %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
 <link rel="stylesheet" href="{% static 'multiplayer_chess/chessboardjs-1.0.0/css/chessboard-1.0.0.min.css' %}">
-<script>var exports = {};</script>
+<link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_chess.css' %}">
+<script>
+  var exports = {};
+</script>
 <script src="{% static 'multiplayer_chess/jquery-3.6.4.min.js' %}"></script>
 <script src="{% static 'multiplayer_chess/chessboardjs-1.0.0/js/chessboard-1.0.0.min.js' %}"></script>
 {% endblock %}
@@ -177,33 +87,61 @@
         }
     }
 
-    //funzione timer - NON é SINCRONIZZATA
-    var el2 = document.getElementById("timer2")
-    var el = document.getElementById("timer"),
-    mins = 3,
-    secs = 0;
+    //funzione timer - BUGGATA
+    var boolTimer = true; //dovrebbe valutare quale timer  utilizzare in onDrop
+    minutiTimer1 = 3;
+    secondiTimer1 = 0;
+    minutiTimer2 = 3;
+    secondiTimer2 = 0;
+    var timer1 = document.getElementById("timer");
+    var timer2 = document.getElementById("timer2");
+    var prompt = '';
+    var origine, fine;
 
-    function countDown() {
-      if (secs || mins) {
-        setTimeout(countDown, 1000);
-      }
-      el.innerHTML = mins + ":" + (secs.toString().length < 2 ? "0" + secs : secs); //padding di numeri
-      el2.innerHTML = mins + ":" + (secs.toString().length < 2 ? "0" + secs : secs); //padding di numeri
-      secs -= 1;
-      if (secs < 0) {
-        mins -= 1;
-        secs = 59;
-      }
-    }
-    countDown();
-
-    function onDrop (source, target, piece, newPos, oldPos, orientation) {
-        if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
-          //$('#modalePromozione').modal('show');
-            prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
-            send_move(source, target, prom)
+    function countDown(conteggio2) {
+      if (boolTimer) {
+        if (minutiTimer1 || secondiTimer1) {
+          conteggio1 = setTimeout(countDown, 100);
+          clearTimeout(conteggio2);
         }
+        timer1.innerHTML = minutiTimer1 + ":" + (secondiTimer1.toString().length < 2 ? "0" + secondiTimer1 : secondiTimer1); //padding di numeri
+        secondiTimer1 -= 1;
+        if (secondiTimer1 < 0) {
+          minutiTimer1 -= 1;
+          secondiTimer1 = 59;
+        }
+      }
+      else {
+        if (minutiTimer2 || secondiTimer2) {
+          conteggio2 = setTimeout(countDown, 100);
+          clearTimeout(conteggio1);
+        }
+        timer2.innerHTML = minutiTimer2 + ":" + (secondiTimer2.toString().length < 2 ? "0" + secondiTimer2 : secondiTimer2); //padding di numeri
+        secondiTimer2 -= 1;
+        if (secondiTimer2 < 0) {
+          minutiTimer2 -= 1;
+          secondiTimer2 = 59;
+        }
+      }
+    }    countDown(boolTimer);
+
+    function onDrop (source, target, piece, boolTimer) {
+      if (boolTimer) {
+        boolTimer = false;
+      }
+      else {
+        boolTimer = true;
+      }
+      if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
+          origine = source;
+          fine = target;
+          $('#modalePromozione').modal('show');
+          //prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la regina, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
+          //send_move(source, target, prom);
+      }
+      else {
         send_move(source, target, "");
+      }
     }
 
     function check_status (fen) {
@@ -290,12 +228,12 @@
 
     function board_block_replace(){
         var oldBoardElement = document.getElementById('myBoard');
-        
+
         var fen = board.fen(); // Ottieni la notazione FEN della posizione attuale
         console.log(fen)
         // Rimuovi l'elemento della scacchiera attuale
         oldBoardElement.innerHTML = '';
-        
+
         // Crea un nuovo elemento per la nuova scacchiera
         var newBoardElement = document.createElement('div');
         newBoardElement.id = 'newBoard';
@@ -303,7 +241,7 @@
         newBoardElement.style.marginLeft = 'auto';
         newBoardElement.style.marginRight = 'auto';
         oldBoardElement.parentNode.replaceChild(newBoardElement, oldBoardElement);
-        
+
         // Crea la nuova scacchiera con la configurazione desiderata e la posizione FEN
         var newBoard = Chessboard('newBoard', {
           orientation: orientation,
@@ -320,15 +258,15 @@
         var quitBtn = document.getElementById('quit-btn');
         quitBtn.style.backgroundColor = 'green';
         quitBtn.style.border = '1px solid green';
-    
+
         var homeLink = document.createElement('a');
         homeLink.id = 'home_link';
         homeLink.href = '/'; // Inserisci qui l'URL della home
         homeLink.appendChild(document.createTextNode('Torna alla home'));
-    
+
         var heading = document.createElement('h2');
         heading.appendChild(homeLink);
-    
+
         quitBtn.innerHTML = '';
         quitBtn.appendChild(heading);
     }
@@ -406,6 +344,6 @@
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
             });
-        });*/
+        }); */
 </script>
 {% endblock %}

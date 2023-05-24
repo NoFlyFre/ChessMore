@@ -1,36 +1,36 @@
-<!DOCTYPE html>
-<html>
+{% extends 'multiplayer_chess/base.html' %}
 
+{% load static %}
+{% block title %} {{title}} {% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Tournament List</title>
-</head>
-<body>
-    <h1>Tournament List</h1>
-    <ul>
-        {% for tournament in tournaments %}
-            <li>
-                <a href="{% url 'multiplayer_chess:tournament_details' tour_id=tournament.id %}">
-                    <h2>{{ tournament.name }}</h2>
-                </a>
-                <p><strong>Variante:</strong> {{ tournament.variante }}</p>
-                <p><strong>Categoria:</strong> {{ tournament.tier }}</p>
-                <p><strong>Start date:</strong> {{ tournament.start_date }}</p>
-                <p><strong>End date:</strong> {{ tournament.end_date }}</p>
-                <p><strong>Number of players:</strong> {{ tournament.players }}</p>
-                
-            </li>
-        {% empty %}
-            <p>No tournaments found.</p>
-        {% endfor %}
-    </ul>
+{% block navbar %}
+    {% include 'multiplayer_chess/navbar.html' %}
+{% endblock %}
 
-    <p>
-        <a href="{% url 'multiplayer_chess:home'%}" role="button" class="btn btn-primary">Back to the home</a>
-    </p>
+{% block content %}
+<link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_lobby.css' %}">
 
-</body>
+<h1 class="mt-3" style="color: white;">Lista Tornei</h1>
+<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 700px;">
+    <div class="row">
+        <div class="col-md-8 offset-md-2 mt-3 mb-2">
+          {% for tournament in tournaments %}
+          <a href="{% url 'multiplayer_chess:tournament_details' tour_id=tournament.id %}">
+                <p class="fs-2">{{ tournament.name }}</p>
+              </a>
+              <ul>
+                <li><strong>Variante:</strong> {{ tournament.variante }}</li>
+                <li><strong>Categoria:</strong> {{ tournament.tier }}</li>
+                <li><strong>Data inizio torneo:</strong> {{ tournament.start_date }}</li>
+                <li><strong>Data fine torneo:</strong> {{ tournament.end_date }}</li>
+                <li><strong>Numero di giocatori:</strong> {{ tournament.players }}</li>
+              </ul>
+            {% empty %}
+            <p>Non ci sono tornei attualmente.</p>
+            {% endfor %}
 
-
-</html>
+            <a href="{% url 'multiplayer_chess:home'%}" role="button" class="btn btn-primary mb-3">Ritorno alla home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
