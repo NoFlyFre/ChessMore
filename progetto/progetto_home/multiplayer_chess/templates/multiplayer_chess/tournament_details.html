@@ -92,7 +92,7 @@
 
                 $.noConflict();
                 jQuery(function($) {
-                    $('div#minimal .demo').bracket({init: bigData});
+                    $('div#minimal .demo').bracket({init: bigData, skipConsolationRound: true});
                 });//skipConsolationRound: true
 
             </script>
@@ -101,10 +101,14 @@
     </ul>
 
     <p>
-        {% if iscritto %}
-            <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
+        {% if tournament_status != "iscrizione" %}
+            <a href="{% url 'multiplayer_chess:chess_game' room_number=match_user_id variant=mode %}" role="button" class="btn btn-primary">Gioca partita  {{match_user}}</a>
         {% else %}
-            <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
+            {% if iscritto %}
+                <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
+            {% else %}
+                <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
+            {% endif %}
         {% endif %}
     </p>
 

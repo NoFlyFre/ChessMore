@@ -308,13 +308,33 @@ def leaderboard(request):
 
 
 def tournament_details(request, tour_id):
-    
+
     tournament = ChessTournament.objects.get(pk=tour_id)
     players = [player.user.username for player in tournament.players.all()]
-    playerss = [[game.player1.username, game.player2.username] for game in tournament.matches.all() if game.bracket_position == 'A']
+    
     results = { 'A': [], 'B':[], 'C': [], 'D': [] }
 
-    for game in tournament.matches.all():
+    matches = tournament.matches.all()
+
+    if tournament.status == 'ottavi':
+        bracket = "A"
+    elif tournament.status == 'quarti':
+        bracket = "B"
+    elif tournament.status == 'semifinale':
+        bracket = "C"
+    elif tournament.status == 'finale':
+        bracket = "D"
+    
+    room_id = 0
+    if tournament.status != 'iscrizione' and request.user.username in players:
+        match_user = tournament.matches.filter(Q(player1=request.user) | Q(player2=request.user)).filter(bracket_position=bracket)
+        room_id = match_user.first().room_id
+    
+    matches_ordered = sorted(matches, key=lambda game: game.numero_torneo, reverse=True)
+
+    playerss = [[game.player1.username, game.player2.username] for game in matches_ordered if game.bracket_position == 'A']
+
+    for game in matches_ordered:
         if game.status != 'finished':
             results[game.bracket_position].append([])
         else:
@@ -322,10 +342,9 @@ def tournament_details(request, tour_id):
                 results[game.bracket_position].append([1,0])
             else:
                 results[game.bracket_position].append([0,1])
+           
     
     results = list(results.values())
-    print(results)        
-
 
     tournament_dict = {
         'id': tournament.pk,
@@ -333,7 +352,7 @@ def tournament_details(request, tour_id):
         'start_date': tournament.start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
         'end_date': tournament.end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
         'players': players,
-        'matches': tournament.matches,
+        'matches': tournament.matches
         #'players_list': players_json
     }
 
@@ -341,13 +360,15 @@ def tournament_details(request, tour_id):
         iscritto = True
     else:
         iscritto = False
-    print(iscritto)
 
     context={
         'tournament_data': tournament_dict ,
         'iscritto': iscritto, 
+        'tournament_status': tournament.status,
         'players_list': playerss,
-        'results': results
-        }
+        'results': results,
+        'match_user_id': room_id,
+        'mode' : tournament.mode
+    }
     
     return render(request, template_name="multiplayer_chess/tournament_details.html", context=context)
