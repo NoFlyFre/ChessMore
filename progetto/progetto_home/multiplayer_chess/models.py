@@ -229,6 +229,7 @@ class ChessTournament(models.Model):
 def crea_partite_ottavi(instance):
     global scheduler_thread
     scheduler_thread.kill()
+    
 
     instance.status = 'ottavi'
     player_list = list(instance.players.all())
@@ -258,6 +259,7 @@ def crea_partite_ottavi(instance):
 
     scheduler_thread = RunScheduleOttavi(instance)
     scheduler_thread.start()
+    return schedule.CancelJob
 
     
 
@@ -269,34 +271,22 @@ def crea_partite_quarti(instance):
     scheduler_thread.kill()
 
     instance.status = 'quarti'
-    game_list = list(instance.matches.filter(bracket_position='A'))
-    player_list = list([game.winner, game.numero_torneo] for game in game_list)
-    print(player_list)
-
+    game_list = instance.matches.filter(bracket_position='A' )
     for i in range(4):
-        
+        game0 = game_list.filter(numero_torneo = i*2)[0] 
+        game1 = game_list.filter(numero_torneo = i*2+1)[0]   
         max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
 
-        player1 = player_list.pop()
-        player2 = player_list.pop()
-
-        if player1[1] < player2[1]:
-            play1 = player2[0]
-            play2 = player1[0]
-        else:
-            play1 = player1[0]
-            play2 = player2[0]
-
         game = Game.objects.create(
-            player1= play1,
-            player2= play2,
-            room_id = max_id + 1,
-            mode = instance.mode, 
-            status = 'started',
-            bracket_position = 'B',
-            numero_torneo = 10 + i
+                player1= game1.winner,
+                player2= game0.winner,
+                room_id = max_id + 1,
+                mode = instance.mode, 
+                status = 'started',
+                bracket_position = 'B',
+                numero_torneo = 10 + i
         )
-
+        
         instance.matches.add(game)
 
     instance.save()
@@ -311,34 +301,23 @@ def crea_partite_semifinale(instance):
     global scheduler_thread
     scheduler_thread.kill()
     instance.status = 'semifinale'
-    game_list = list(instance.matches.filter(bracket_position='B'))
-    player_list = list([game.winner,  game.numero_torneo] for game in game_list)
 
+    game_list = instance.matches.filter(bracket_position='B')
     for i in range(2):
-
+        game0 = game_list.filter(numero_torneo = 10 + i*2)[0] 
+        game1 = game_list.filter(numero_torneo = 10 + i*2+1)[0]   
         max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
 
-        player1 = player_list.pop()
-        player2 = player_list.pop()
-
-        if player1[1] < player2[1]:
-            play1 = player2[0]
-            play2 = player1[0]
-        else:
-            play1 = player1[0]
-            play2 = player2[0]
-
-
         game = Game.objects.create(
-            player1= play1,
-            player2= play2,
-            room_id = max_id + 1,
-            mode = instance.mode, 
-            status = 'started',
-            bracket_position = 'C',
-            numero_torneo = 20 + i
+                player1= game1.winner,
+                player2= game0.winner,
+                room_id = max_id + 1,
+                mode = instance.mode, 
+                status = 'started',
+                bracket_position = 'C',
+                numero_torneo = 20 + i
         )
-
+        
         instance.matches.add(game)
 
     instance.save()
@@ -352,32 +331,24 @@ def crea_partita_finale(instance):
     global scheduler_thread
     scheduler_thread.kill()
     instance.status = 'finale'
-    game_list = list(instance.matches.filter(bracket_position='C'))
-    player_list = list([game.winner,  game.numero_torneo] for game in game_list)
+    game_list = instance.matches.filter(bracket_position='C')
+    
+    game0 = game_list.filter(numero_torneo = 20)[0] 
+    game1 = game_list.filter(numero_torneo = 21)[0]   
     max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
 
-    player1 = player_list.pop()
-    player2 = player_list.pop()
-
-    if player1[1] < player2[1]:
-        play1 = player2[0]
-        play2 = player1[0]
-    else:
-        play1 = player1[0]
-        play2 = player2[0]
-
-
     game = Game.objects.create(
-        player1= play1,
-        player2= play2,
-        room_id = max_id + 1,
-        mode = instance.mode, 
-        status = 'started',
-        bracket_position = 'D',
-        numero_torneo = 30
+            player1= game1.winner,
+            player2= game0.winner,
+            room_id = max_id + 1,
+            mode = instance.mode, 
+            status = 'started',
+            bracket_position = 'D',
+            numero_torneo = 30
     )
-
+        
     instance.matches.add(game)
+
     instance.save()
 
     scheduler_thread = RunScheduleFinale(instance)

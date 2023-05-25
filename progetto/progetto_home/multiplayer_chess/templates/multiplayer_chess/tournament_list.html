@@ -1,36 +1,87 @@
-<!DOCTYPE html>
-<html>
+{% extends 'multiplayer_chess/base.html' %}
 
+{% load static %}
+{% block title %} {{title}} {% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Tournament List</title>
-</head>
-<body>
-    <h1>Tournament List</h1>
-    <ul>
-        {% for tournament in tournaments %}
-            <li>
-                <a href="{% url 'multiplayer_chess:tournament_details' tour_id=tournament.id %}">
-                    <h2>{{ tournament.name }}</h2>
+{% block navbar %}
+    {% include 'multiplayer_chess/navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_lobby.css' %}">
+
+<style>
+    .container {
+        background-color: white;
+        border-radius: 20px; /* adjust the value to your preference */
+    }
+    
+    h1, label, legend, input[type="text"], textarea, h2 {
+        text-align: center;
+        color: black; /* or any other color value that you prefer */
+    }
+    
+    .btn-outline-info {
+        color: black;
+        border-color: black;
+    }
+    
+    .loader {
+      position: relative;
+      top: -30px;
+      left: 175px;
+      width: 75px;
+      height: 75px;
+      display: flex;
+      align-items: center;
+      background-color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
+      transition: opacity 0.75s, visibility 0.75s;
+    }
+    
+    .loader::after{
+      content: "";
+      width: 75px;
+      height: 75px;
+      border: 15px solid black;
+      border-top-color: #123456;
+      border-radius: 50%;
+      animation: loading 0.75s ease infinite;
+    }
+    
+    @keyframes loading {
+      from{
+        transform: rotate(0turn);
+      }
+      to{
+        transform: rotate(1turn);
+      }
+    }
+    
+</style> 
+
+<h1 class="mt-3 text-center" style="color: white;">Lista Tornei</h1>
+    <div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 700px;">
+        <div class="row">
+            <div class="col-md-8 offset-md-2 mt-3 mb-2">
+            {% for tournament in tournaments %}
+            <a href="{% url 'multiplayer_chess:tournament_details' tour_id=tournament.id %}">
+                    <p class="fs-2">{{ tournament.name }}</p>
                 </a>
-                <p><strong>Variante:</strong> {{ tournament.variante }}</p>
-                <p><strong>Categoria:</strong> {{ tournament.tier }}</p>
-                <p><strong>Start date:</strong> {{ tournament.start_date }}</p>
-                <p><strong>End date:</strong> {{ tournament.end_date }}</p>
-                <p><strong>Number of players:</strong> {{ tournament.players }}</p>
-                
-            </li>
-        {% empty %}
-            <p>No tournaments found.</p>
-        {% endfor %}
-    </ul>
+                <ul>
+                    <li><strong>Variante:</strong> {{ tournament.variante }}</li>
+                    <li><strong>Categoria:</strong> {{ tournament.tier }}</li>
+                    <li><strong>Data inizio torneo:</strong> {{ tournament.start_date }}</li>
+                    <li><strong>Data fine torneo:</strong> {{ tournament.end_date }}</li>
+                    <li><strong>Numero di giocatori:</strong> {{ tournament.players }}</li>
+                </ul>
+                {% empty %}
+                <p>Non ci sono tornei attualmente.</p>
+                {% endfor %}
 
-    <p>
-        <a href="{% url 'multiplayer_chess:home'%}" role="button" class="btn btn-primary">Back to the home</a>
-    </p>
+                <a href="{% url 'multiplayer_chess:home'%}" role="button" class="btn btn-primary mb-3">Ritorno alla home</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
-</body>
 
-
-</html>

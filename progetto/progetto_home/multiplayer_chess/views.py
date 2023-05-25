@@ -162,7 +162,6 @@ def chess_game(request, room_number, variant):
         messages.error(request, "La partita è terminata")
         return redirect('/home/')
     
-
     order = 1 if game.player1 == user else 2
 
     profiles1 = Profile.objects.filter(user_id=game.player1)

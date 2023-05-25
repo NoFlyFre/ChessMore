@@ -10,5 +10,7 @@ class ProfileAdmin(admin.ModelAdmin):
 class GameAdmin(admin.ModelAdmin):
     ordering = ('-room_id',)
 
+
+
 admin.site.register(ChessTournament)
 
