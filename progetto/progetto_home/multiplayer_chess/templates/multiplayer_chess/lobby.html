@@ -7,53 +7,6 @@
 
 {% block content %}
 
-    <style>
-        .container {
-            background-color: white;
-            border-radius: 20px; /* adjust the value to your preference */
-        }
-
-        h1, label, legend, input[type="text"], textarea {
-            color: black; /* or any other color value that you prefer */
-        }
-
-        .btn-outline-info {
-            color: black;
-            border-color: black;
-        }
-
-        .loader {
-          position: relative;
-          top: -30px;
-          left: 175px;
-          width: 75px;
-          height: 75px;
-          display: flex;
-          align-items: center;
-          background-color: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
-          transition: opacity 0.75s, visibility 0.75s;
-        }
-
-        .loader::after{
-          content: "";
-          width: 75px;
-          height: 75px;
-          border: 15px solid black;
-          border-top-color: #123456;
-          border-radius: 50%;
-          animation: loading 0.75s ease infinite;
-        }
-
-        @keyframes loading {
-          from{
-            transform: rotate(0turn);
-          }
-          to{
-            transform: rotate(1turn);
-          }
-        }
-    </style>
-
 <script>
     const socket = new WebSocket('ws://' + window.location.host + '/ws/lobbyws/' + "{{mode}}" + '/');
     socket.addEventListener('open', function (event) {
@@ -62,7 +15,7 @@
 
     socket.addEventListener('message', function (event) {
         let data = JSON.parse(event.data)
-        
+
         if (data['type'] === 'match_found') {
             // redirect the user to another page
             window.location.href = 'http://localhost:8000/' + encodeURIComponent(data['mode']) + '/' + encodeURIComponent(data['message']);
@@ -78,4 +31,5 @@
         </div>
     </div>
 </div>
+<link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_lobby.css' %}">
 {% endblock %}

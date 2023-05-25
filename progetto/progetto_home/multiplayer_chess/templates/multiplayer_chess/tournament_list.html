@@ -6,6 +6,7 @@
 {% block navbar %}
     {% include 'multiplayer_chess/navbar.html' %}
 {% endblock %}
+<<<<<<< HEAD
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_lobby.css' %}">
@@ -85,3 +86,33 @@
 {% endblock %}
 
 
+=======
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_lobby.css' %}">
+
+<h1 class="mt-3" style="color: white;">Lista Tornei</h1>
+<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 700px;">
+    <div class="row">
+        <div class="col-md-8 offset-md-2 mt-3 mb-2">
+          {% for tournament in tournaments %}
+          <a href="{% url 'multiplayer_chess:tournament_details' tour_id=tournament.id %}">
+                <p class="fs-2">{{ tournament.name }}</p>
+              </a>
+              <ul>
+                <li><strong>Variante:</strong> {{ tournament.variante }}</li>
+                <li><strong>Categoria:</strong> {{ tournament.tier }}</li>
+                <li><strong>Data inizio torneo:</strong> {{ tournament.start_date }}</li>
+                <li><strong>Data fine torneo:</strong> {{ tournament.end_date }}</li>
+                <li><strong>Numero di giocatori:</strong> {{ tournament.players }}</li>
+              </ul>
+            {% empty %}
+            <p>Non ci sono tornei attualmente.</p>
+            {% endfor %}
+
+            <a href="{% url 'multiplayer_chess:home'%}" role="button" class="btn btn-primary mb-3">Ritorno alla home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+>>>>>>> 1f5d68e6b92a893978b2af531c105b362b4d48db

@@ -1,8 +1,6 @@
 {% extends 'multiplayer_chess/base.html' %}
 {% load static %}
-{% block title %}
-    <title>Home</title>
-{% endblock %}
+{% block title %} {{title}} {% endblock %}
 
 {% block navbar %}
     {% include 'multiplayer_chess/navbar.html' %}
@@ -106,6 +104,3 @@
         </div>
     </div>
 {% endblock %}
-
-
-

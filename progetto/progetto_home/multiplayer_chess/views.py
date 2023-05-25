@@ -206,6 +206,7 @@ def chess_game(request, room_number, variant):
         elif variant == 'antichess':
             elo_player2 = profile2.elo_antichess
 
+        
     ctx = {
         "title" : "Partita scacchi",
         "order": order,
