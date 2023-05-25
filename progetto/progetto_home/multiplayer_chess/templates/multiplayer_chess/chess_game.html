@@ -88,7 +88,7 @@
     }
 
     //funzione timer - BUGGATA
-    var boolTimer = true; //dovrebbe valutare quale timer  utilizzare in onDrop
+    var boolTimer = true; //dovrebbe valutare quale timer utilizzare in onDrop
     minutiTimer1 = 3;
     secondiTimer1 = 0;
     minutiTimer2 = 3;
@@ -151,23 +151,38 @@
                 let winner = "bianchi";
                 if(turn === 'w')
                     winner = "neri";
-                alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+                //alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+                socket.close();
+                game_is_over("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+                modify_quit_btn();
                 break;
             case "stalemate":
-                alert("La partita è finita in pareggio per stallo!")
+                //alert("La partita è finita in pareggio per stallo!");
+                socket.close();
+                game_is_over("La partita è finita in pareggio per stallo!");
+                modify_quit_btn();
                 break;
             case "insufficient":
-                alert("La partita è finita in pareggio per posizione morta!")
+                //alert("La partita è finita in pareggio per posizione morta!");
+                socket.close();
+                game_is_over("La partita è finita in pareggio per posizione morta!");
+                modify_quit_btn();
                 break;
             case "var_draw":
-                alert("La partita è finita in pareggio per una regola della variante!")
+                //alert("La partita è finita in pareggio per una regola della variante!");
+                socket.close();
+                game_is_over("La partita è finita in pareggio per una regola della variante!");
+                modify_quit_btn();
                 break;
             case "var_loss":
                 let winner2 = "bianchi"
                 if(turn === 'w')
                     winner2 = "neri"
-                alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2)
-                break;
+                //alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2);
+                socket.close();
+                game_is_over("La partita è finita in pareggio per una regola della variante!");
+                modify_quit_btn();
+                break;     
         }
     }
 
@@ -295,6 +310,13 @@
         document.querySelector('#chat-message-container').appendChild(div);
     }
 
+    function game_is_over(message){
+        var div = document.createElement("div");
+        div.style.fontStyle = "italic";
+        div.innerHTML = message;
+        document.querySelector('#chat-message-container').appendChild(div);
+    }
+
     function send_move(source, target, prom){
         let obj = new Object();
         obj.move = source + target + prom;
@@ -330,10 +352,12 @@
 
     document.querySelector('#quit-btn').onclick = function(e){
         const userName = JSON.parse(document.getElementById('username').textContent);
-        socket.send(JSON.stringify({
+        if(socket){
+            socket.send(JSON.stringify({
             'username': userName,
             'type': 'abbandona'
-        }))
+            }))
+        }
     }
 
     //per ora commentata per avere le modifiche del tasto abbandona
