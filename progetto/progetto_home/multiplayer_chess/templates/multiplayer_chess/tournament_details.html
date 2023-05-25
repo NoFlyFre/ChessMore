@@ -16,89 +16,86 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_lobby.css' %}">
 
-<div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 700px;">
+
+<h1 class="mt-3 text-center" style="color: white;">{{tournament_data.name}}</h1>
+<div class="container mt-4" style="max-width: 1200px; border-radius: 20px; ">
     <div class="row">
-        <div class="col-md-8 offset-md-2 mt-1">
-          <h1 class="mb-4">Dettagli Torneo:</h1>
-
-              <li><strong>Nome:</strong> {{ tournament_data.name }}</li>
-              <li><strong>Data Inizio:</strong> {{ tournament_data.start_date }}</li>
-              <li><strong>Data Fine:</strong> {{ tournament_data.end_date }}</li>
-
-          <p><em>Giocatori:</em></p>
-
-          <ul>
-              {% for player in tournament_data.players %}
-                  <li>{{ player }}</li>
-              {% empty %}
-                  <li>No players yet.</li>
-              {% endfor %}
-          </ul>
-
-    <p><em>Players:</em></p>
-
-    <ul>
-        {% for player in tournament_data.players %}
-            <li>{{ player }}</li>
-        {% empty %}
-            <li>No players yet.</li>
-        {% endfor %}
-
-        <div id="minimal">
-            <!--script>
-                var players_array = [['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test2', 'test1'], ['test1', 'test2'], ['test1', 'test2'], ['test1', 'test2']]; 
-                var results = [[0, 1], [1, 0], [1, 0], [1, 0], [1, 0], [], [1, 0], [1, 0], [], [], [], [], [], [], [], [], [], [1, 0], []];
-                console.log(players_array);
-                console.log(results)
-                var bigData = {
-                    "teams":
-                    [ // Matchups players_array ],
-                    "results":
-                    [ // List of brackets (single elimination, so only one bracket)
-                        [ // List of rounds in bracket // First round in this bracket results 
-                        ] 
-                    ] 
-                } 
-                $(function() { $('div#minimal .demo').bracket({init: bigData}) }) 
-            </!--script-->
-            <script>
-                var players_array = {{players_list|safe}};
-                var results = {{results|safe}};
-                console.log(players_array);
-                console.log(results)
-                var bigData = {
-                    "teams":       
-                        players_array,
-                    "results": [            
-                        results
-                    ]
-                }
-
-                $.noConflict();
-                jQuery(function($) {
-                    $('div#minimal .demo').bracket({init: bigData, skipConsolationRound: true});
-                });//skipConsolationRound: true
-
-            </script>
-            <div class="demo"></div>
+        <h2 class="mb-4">Dettagli Torneo:</h2>
+        <div class="col-md-6 mt-1">
+            
+            
+    
+            <ul>
+                <li><strong>Nome:</strong> {{ tournament_data.name }}</li>
+                <li><strong>Data Inizio:</strong> {{ tournament_data.start_date }}</li>
+                <li><strong>Data Fine:</strong> {{ tournament_data.end_date }}</li>
+            </ul>
+        
+            <p style="margin-bottom: 5px;">Giocatori:</p>
+        
+            <ul>
+                {% for player in tournament_data.players %}
+                    <li>{{ player }}</li>
+                {% empty %}
+                    <li>No players yet.</li>
+                {% endfor %}
+            </ul>
+    
         </div>
-    </div>
-</div>
-
-    <p>
-        {% if tournament_status != "iscrizione" %}
-            <a href="{% url 'multiplayer_chess:chess_game' room_number=match_user_id variant=mode %}" role="button" class="btn btn-primary">Gioca partita  {{match_user}}</a>
-        {% else %}
-            {% if iscritto %}
-                <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
-            {% else %}
-                <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
-            {% endif %}
+        
+        {% if tournament_status != 'iscrizione' %}
+            <div class="col-md-6">
+                <div id="minimal">
+                    <script>
+                        var players_array = {{players_list|safe}};
+                        var results = {{results|safe}};
+                        console.log(players_array);
+                        console.log(results)
+                        var bigData = {
+                            "teams":       
+                                players_array,
+                            "results": [            
+                                results
+                            ]
+                        }
+        
+                        $.noConflict();
+                        jQuery(function($) {
+                            $('div#minimal .demo').bracket({init: bigData, skipConsolationRound: true});
+                        });//skipConsolationRound: true
+        
+                    </script>
+                    <div class="demo"></div>
+                </div>
+            </div>
         {% endif %}
-    </p>
+    </div>
 
-    <p>
-        <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary mb-2">Back to the list</a>
-    </p>
+    {% if tournament_status != 'iscrizione' %}
+        <div class="row mt-4">
+            <div class="col">
+                <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary mb-2">Back to the list</a>
+            </div>
+            <div class="col">
+                <a href="{% url 'multiplayer_chess:chess_game' room_number=match_user_id variant=mode %}" role="button" class="btn btn-primary">Vai alla tua partita  {{match_user}}</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="row mt-4">
+            <div class="col">
+                <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary mb-2">Back to the list</a>
+                {% if iscritto %}
+                    <p>
+                        <a href="{% url 'multiplayer_chess:tournament_unsubscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Disiscriviti dal Torneo</a>
+                    </p>
+                {% else %}
+                    <p>
+                        <a href="{% url 'multiplayer_chess:tournament_subscribe' tour_id=tournament_data.id %}" role="button" class="btn btn-primary">Iscriviti al Torneo</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 </div>
+
 {% endblock %}
