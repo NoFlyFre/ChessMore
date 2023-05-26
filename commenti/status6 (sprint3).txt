@@ -1,4 +1,4 @@
-14 MAGGIO
+26 MAGGIO
 
 TEAM
 Cosmin Iulian Burlacu	SM
@@ -7,6 +7,13 @@ Gabriel Panini	T
 Vittorio de Simone	T
 Giovanni Cocchi	T
 Francesco Caligiuri	T
+
+Checklist S3
+git: manca il tag sprint1 e sprint3; commit abbastanza sbilanciati
+sonarqube: va, ma i risultati non sono eccelsi
+mattermost: magari invitatemi agli altri canali così vedo un po' come lo usate
+taiga: in uso
+Manca qualche artefatto dello Sprint 3
 
 
 
@@ -29,18 +36,21 @@ Aggiornamento US,  SPRINT GOAL DOD DOR, : MANCANO INVECE BACKLOG, BURNDOWN,SPRIN
 Sprint review: 
 	S1: Più una demo che una sR
 	S2: OK, magari mettere qualche considerazione alla fine.
+	S2: OK
 Retrospective: 
 	S1: Buona
 	S2: Buona
+	S3: Manca
 Testing/Coverage:  non si vedono, coverage 0%
 SQ: in uso.
 Devops: no
 
 
 COMMENTO GENERALE
-Avete in parte recuperato lo scivolone dello sprint precedente. Tuttavia a livello di feature siamo ancora un po' indietro, manca tutta o quasi la documentazione dello sprint 2, non ci sono test. 
-Dall'esterno, si ha l'impressione che il gruppo lavori poco e/o che l'organizzazione del lavoro non sia granché. 
+Il cliente è rimasto soddisfatto in generale del numero delle varianti e dalla possibilità di giocare il torneo. Ci sono aspetti di usabilità ancora da limare ma va abbastanza bene. 
+La qualità del software è un po' un problema. Lavorare su quello
 
-Il programma è abbastanza usabile, anzi, secondo me avete realizzato PIU' funzionalità di quelle che avete detto, ma non sono chiaaremente esposte (es: ricarca di avversari compatibili), e potreste "venderle" meglio. I casi eccezionali sono ancora un problema (es: "abbandona la partita")
+
+
 
 
