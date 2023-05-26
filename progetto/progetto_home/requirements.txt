@@ -66,7 +66,6 @@ soupsieve==2.3.2.post1
 sqlparse==0.4.4
 tqdm==4.64.1
 Twisted==22.10.0
-twisted-iocpsupport==1.0.3
 txaio==23.1.1
 typing_extensions==4.5.0
 tzdata==2023.3
@@ -76,3 +75,4 @@ virtualenv-clone==0.5.7
 whitenoise==6.4.0
 zope.event==4.6
 zope.interface==5.5.2
+schedule
