@@ -1,8 +1,6 @@
 {% extends 'multiplayer_chess/base.html' %}
 {% load static %}
-{% block title %}
-    <title>Home</title>
-{% endblock %}
+{% block title %} {{title}} {% endblock %}
 
 {% block navbar %}
     {% include 'multiplayer_chess/navbar.html' %}
@@ -12,19 +10,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     {% if messages %}
-    {% for message in messages %}
-        {% if message.tags == 'error' %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            {{ message }}
-        </div>
-        {% elif message.tags == 'success' %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            {{ message }}
-        </div>
-        {% endif %}
-    {% endfor %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                {{ message }}
+            </div>
+            {% elif message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                {{ message }}
+            </div>
+            {% endif %}
+        {% endfor %}
     {% endif %}
 
     <style>
@@ -48,15 +46,15 @@
                 <div class="card">
                     <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/anti_chess.jpg' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi vinciperdi</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='antichess' %}" class="btn primary_bg stretched-link">Gioca a scacchi vinciperdi</a>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_suicide.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/king_of_the_hill_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi suicidio</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='kingofthehill' %}" class="btn primary_bg stretched-link">Gioca a scacchi king of the hill</a>
                     </div>
                 </div>
             </div>
@@ -73,25 +71,25 @@
         <div class="row second-row">
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/three_check_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='threecheck' %}" class="btn primary_bg stretched-link">Gioca a scacchi 3-check</a>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/horde_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='horde' %}" class="btn primary_bg stretched-link">Gioca a scacchi orda</a>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-3 mx-auto my-3 text-center">
                 <div class="card">
-                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/chess_friend.jpg' %}" class="card-img-top" alt="...">
+                    <img style="max-height: 333px;" src="{% static 'multiplayer_chess/images/racing_kings_chess.png' %}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn primary_bg stretched-link">Gioca a scacchi ...</a>
+                        <a href="{% url 'multiplayer_chess:lobby' mode='racingkings' %}" class="btn primary_bg stretched-link">Gioca a scacchi racing kings</a>
                     </div>
                 </div>
             </div>
@@ -106,6 +104,3 @@
         </div>
     </div>
 {% endblock %}
-
-
-

@@ -8,8 +8,22 @@
     {% block head %} {% endblock %}
     <title>{% block title %} {% endblock %}</title>
 </head>
-<body style="background-color: #3e3e3e;">
+<body style="background-color: #3e3e3e; height: 100vh; overflow:hidden;">
 {% block content %}
 {% endblock %}
 </body>
+<div class="modal fade" id="modalePromozione" data-bs-backdrop="false" data-bs-keyboard="true"
+ tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title col-md-8 offset-md-2" id="PromozionelLabel">In quale pezzo vorresti promuovere il pedone?</h5>
+      </div>
+      <div class="modal-body col-md-8 offset-md-2">
+        <button type="button" class="btn btn-primary" onclick=" send_move(origine, fine, 'q') " data-bs-dismiss="modal">Regina</button>
+        <button type="button" class="btn btn-primary" onclick=" send_move(origine, fine, 'n')" data-bs-dismiss="modal">Cavallo</button>
+        <button type="button" class="btn btn-primary" onclick=" send_move(origine, fine, 'b')" data-bs-dismiss="modal">Alfiere</button>
+        <button type="button" class="btn btn-primary" onclick=" send_move(origine, fine, 'r')" data-bs-dismiss="modal">Torre</button>
+      </div>
+      </div></div></div>
 </html>

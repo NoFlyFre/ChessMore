@@ -20,12 +20,12 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = ["username", "email", "password1", "password2"]
 
     def clean_email(self):
         data = self.cleaned_data['email']
         if User.objects.filter(email=data).exists():
-            raise forms.ValidationError('Email already in use.')
+            raise forms.ValidationError('questa e-mail è già registrata; riprovare.')
         return data
 
 class UserEditForm(forms.ModelForm):

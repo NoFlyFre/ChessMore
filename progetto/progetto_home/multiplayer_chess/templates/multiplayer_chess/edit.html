@@ -9,8 +9,7 @@
 {% block content %}
     <style>
         .container {
-            background-color: #949494;
-            background-image: linear-gradient(315deg, #949494 0%, #E8E8E8 100%);
+            background-color: white;
             border-radius: 20px; /* adjust the value to your preference */
         }
 
@@ -42,10 +41,10 @@
         {% endfor %}
     {% endif %}
 
-    <div class="container mt-5" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 800px;">
+    <h1 class="mt-3 text-center" style="color: white;">Edit your account</h1>
+    <div class="container mt-4" style="border: none; box-shadow: 0px 0px 30px #888888; max-width: 800px;">
         <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <h1 class="text-center mb-5 mt-3">Edit your account</h1>
+            <div class="col-md-8 offset-md-2 mt-2">
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <fieldset class="form-group">
