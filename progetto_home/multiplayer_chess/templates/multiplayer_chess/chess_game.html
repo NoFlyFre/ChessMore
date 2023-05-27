@@ -1,0 +1,371 @@
+{% extends 'multiplayer_chess/base_for_classic_chess.html' %}
+
+{%block head %}
+{% load static %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+<link rel="stylesheet" href="{% static 'multiplayer_chess/chessboardjs-1.0.0/css/chessboard-1.0.0.min.css' %}">
+<link rel="stylesheet" href="{% static 'multiplayer_chess/CSS/grafica_chess.css' %}">
+<script>
+  var exports = {};
+</script>
+<script src="{% static 'multiplayer_chess/jquery-3.6.4.min.js' %}"></script>
+<script src="{% static 'multiplayer_chess/chessboardjs-1.0.0/js/chessboard-1.0.0.min.js' %}"></script>
+{% endblock %}
+{% block title %} {{title}} {% endblock %}
+{% block content %}
+<div class="row">
+    <div class="column left">
+        <div id="move-container"></div>
+    </div>
+    <div class="column middle">
+      <div class="float-start ms-4 mb-1">
+        {% if user2_image %}
+        <img src="/media/{{ user2_image }}" alt="{{ username }}'s Image" class="img-thumbnail">
+        {% else %}
+        <img src="{% static 'multiplayer_chess/images/user.jpg' %}" alt="Default Image" class="img-thumbnail">
+        {% endif %}
+      </div>
+      <div>
+        <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ username2 }}</p>
+      </div>
+      {% if user_elo2 %}
+            <div>
+                <p class="fs-3 float-start ms-3 border border-3  border-dark" style="color: white"> {{ user_elo2 }}</p>
+            </div>
+       {% endif %}
+      <div id="timer2" class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white"></div>
+      <div class="container float-end">
+          <div id="myBoard"  class="border border-5  border-dark"style="width: 500px; margin-left: auto; margin-right: auto;"></div>
+      </div>
+      <div class="float-start ms-4 mt-1">
+          {% if user_image %}
+            <img src="/media/{{ user_image }}" alt="{{ username2 }}'s Image" class="img-thumbnail">
+          {% else %}
+            <img src="{% static 'multiplayer_chess/images/user.jpg' %}" alt="Default Image" class="img-thumbnail">
+          {% endif %}
+        </div>
+        <div>
+          <p class="fs-3 float-start ms-4 mt-1 border border-3  border-dark" style="color: white"> {{ username }}</p>
+        </div>
+        {% if user_elo1 %}
+            <div>
+                <p class="fs-3 float-start mt-1 ms-3 border border-3  border-dark" style="color: white"> {{ user_elo1 }}</p>
+            </div>
+        {% endif %}
+        <div id="timer" class="fs-3 float-end me-4 mt-1 border border-3  border-dark" style="color: white"></div>
+    </div>
+    <div class="column right">
+        <div class="container d-grid gap-2 col-6 mx-auto mt-5">
+            <div class="box bg-dark text-light mt-5">
+                <div id="chat-message-container" class="container">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input class="input bg-dark border-dark text-light " type="text" placeholder="Message" id="chat-message-input">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input id="chat-message-submit" type="button" value="Invia" class="btn btn-success">
+                </div>
+            </div>
+            <button type="button" id="quit-btn" class="btn btn-danger btn-lg mt-5">Abbandona la partita</button>
+    </div>
+  </div>
+</div>
+
+{{ username|json_script:"username" }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
+    function onDragStart (source, piece, position, orientation) {
+        if (game_status || (turn === "w" && piece.search(/^b/) !== -1) ||
+            (turn === "b" && piece.search(/^w/) !== -1) || turn != orientation[0]) {
+            return false;
+        }
+    }
+
+    //funzione timer - BUGGATA
+    var boolTimer = true; //dovrebbe valutare quale timer utilizzare in onDrop
+    minutiTimer1 = 3;
+    secondiTimer1 = 0;
+    minutiTimer2 = 3;
+    secondiTimer2 = 0;
+    var timer1 = document.getElementById("timer");
+    var timer2 = document.getElementById("timer2");
+    var prompt = '';
+    var origine, fine;
+
+    function countDown(conteggio2) {
+      if (boolTimer) {
+        if (minutiTimer1 || secondiTimer1) {
+          conteggio1 = setTimeout(countDown, 100);
+          clearTimeout(conteggio2);
+        }
+        timer1.innerHTML = minutiTimer1 + ":" + (secondiTimer1.toString().length < 2 ? "0" + secondiTimer1 : secondiTimer1); //padding di numeri
+        secondiTimer1 -= 1;
+        if (secondiTimer1 < 0) {
+          minutiTimer1 -= 1;
+          secondiTimer1 = 59;
+        }
+      }
+      else {
+        if (minutiTimer2 || secondiTimer2) {
+          conteggio2 = setTimeout(countDown, 100);
+          clearTimeout(conteggio1);
+        }
+        timer2.innerHTML = minutiTimer2 + ":" + (secondiTimer2.toString().length < 2 ? "0" + secondiTimer2 : secondiTimer2); //padding di numeri
+        secondiTimer2 -= 1;
+        if (secondiTimer2 < 0) {
+          minutiTimer2 -= 1;
+          secondiTimer2 = 59;
+        }
+      }
+    }    countDown(boolTimer);
+
+    function onDrop (source, target, piece, boolTimer) {
+      if (boolTimer) {
+        boolTimer = false;
+      }
+      else {
+        boolTimer = true;
+      }
+      if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
+          origine = source;
+          fine = target;
+          $('#modalePromozione').modal('show');
+          //prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la regina, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
+          //send_move(source, target, prom);
+      }
+      else {
+        send_move(source, target, "");
+      }
+    }
+
+    function check_status (fen) {
+        board.position(fen);
+        switch(game_status){
+            case "checkmate":
+                let winner = "bianchi";
+                if(turn === 'w')
+                    winner = "neri";
+                //alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+                socket.close();
+                game_is_over("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
+                modify_quit_btn();
+                break;
+            case "stalemate":
+                //alert("La partita è finita in pareggio per stallo!");
+                socket.close();
+                game_is_over("La partita è finita in pareggio per stallo!");
+                modify_quit_btn();
+                break;
+            case "insufficient":
+                //alert("La partita è finita in pareggio per posizione morta!");
+                socket.close();
+                game_is_over("La partita è finita in pareggio per posizione morta!");
+                modify_quit_btn();
+                break;
+            case "var_draw":
+                //alert("La partita è finita in pareggio per una regola della variante!");
+                socket.close();
+                game_is_over("La partita è finita in pareggio per una regola della variante!");
+                modify_quit_btn();
+                break;
+            case "var_loss":
+                let winner2 = "bianchi"
+                if(turn === 'w')
+                    winner2 = "neri"
+                //alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2);
+                socket.close();
+                game_is_over("La partita è finita in pareggio per una regola della variante!");
+                modify_quit_btn();
+                break;     
+        }
+    }
+
+    function pieceTheme (piece) {
+        return "{% static '/multiplayer_chess/chessboardjs-1.0.0/img/chesspieces/wikipedia/' %}" + piece + '.png';
+    }
+    let orientation = 'white';
+    {% if order == 2 %}
+        orientation = 'black';
+    {% endif %}
+
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chessws/' + "{{room_number}}" + "/" + "{{variant}}" + "/");
+    console.log(socket);
+
+    let config = {
+        orientation: orientation,
+        draggable: true,
+        pieceTheme: pieceTheme,
+        onDragStart: onDragStart,
+        onDrop: onDrop,
+        onSnapEnd: check_status
+    };
+
+    let board;
+    let turn;
+
+    fetch("get_position/").then(response => response.json()).then(data => {
+        config.position = data.fen
+        turn = data.turn
+        board = ChessBoard('myBoard', config);
+    }).catch(error => console.error(error));
+
+    /*
+    config.position = 'start'
+    board = ChessBoard('myBoard', config);
+    */
+
+    let game_status = "";
+    let count = 1;
+
+    socket.onmessage = function(e){
+        const data = JSON.parse(e.data);
+
+        if(data.type == 'game_move')
+        {
+            game_receive(data);
+        }
+        else if(data.type == 'messaggio'){
+            message_receive(data);
+        }
+        else if(data.type == 'abbandona'){
+            quit_receive(data);
+            socket.close();
+            board_block_replace();
+            modify_quit_btn();
+        }
+    };
+
+    function board_block_replace(){
+        var oldBoardElement = document.getElementById('myBoard');
+
+        var fen = board.fen(); // Ottieni la notazione FEN della posizione attuale
+        console.log(fen)
+        // Rimuovi l'elemento della scacchiera attuale
+        oldBoardElement.innerHTML = '';
+
+        // Crea un nuovo elemento per la nuova scacchiera
+        var newBoardElement = document.createElement('div');
+        newBoardElement.id = 'newBoard';
+        newBoardElement.style.width = '500px';
+        newBoardElement.style.marginLeft = 'auto';
+        newBoardElement.style.marginRight = 'auto';
+        oldBoardElement.parentNode.replaceChild(newBoardElement, oldBoardElement);
+
+        // Crea la nuova scacchiera con la configurazione desiderata e la posizione FEN
+        var newBoard = Chessboard('newBoard', {
+          orientation: orientation,
+          draggable: false,
+          pieceTheme: pieceTheme,
+          position: fen,
+          onDragStart: onDragStart,
+          onDrop: onDrop,
+          onSnapEnd: check_status
+        });
+    }
+
+    function modify_quit_btn() {
+        var quitBtn = document.getElementById('quit-btn');
+        quitBtn.style.backgroundColor = 'green';
+        quitBtn.style.border = '1px solid green';
+
+        var homeLink = document.createElement('a');
+        homeLink.id = 'home_link';
+        homeLink.href = '/'; // Inserisci qui l'URL della home
+        homeLink.appendChild(document.createTextNode('Torna alla home'));
+
+        var heading = document.createElement('h2');
+        heading.appendChild(homeLink);
+
+        quitBtn.innerHTML = '';
+        quitBtn.appendChild(heading);
+    }
+
+    function game_receive(data){
+        game_status = data.status;
+        turn = data.turn;
+        check_status(data.fen);
+        store_move(data.last_move, data.result);
+    }
+
+    function message_receive(data){
+        if (data.type === "connection_established") {
+            return;
+        }
+        var div = document.createElement("div");
+        div.innerHTML = data.username + ": " + data.message;
+        document.querySelector('#chat-message-container').appendChild(div);
+    }
+
+    function quit_receive(data){
+        console.log("l'utente ha abbandonato");
+        var div = document.createElement("div");
+        div.style.fontStyle = "italic";
+        div.innerHTML = data.username + " ha abbandonato la partita";
+        document.querySelector('#chat-message-container').appendChild(div);
+    }
+
+    function game_is_over(message){
+        var div = document.createElement("div");
+        div.style.fontStyle = "italic";
+        div.innerHTML = message;
+        document.querySelector('#chat-message-container').appendChild(div);
+    }
+
+    function send_move(source, target, prom){
+        let obj = new Object();
+        obj.move = source + target + prom;
+        obj.type = 'game_move';
+        let string = JSON.stringify(obj);
+        socket.send(string);
+    }
+
+    function store_move(move, result) {
+        if (result == 'success') {
+            const moveContainer = document.getElementById('move-container');
+            const moveElement = document.createElement('p');
+            const moveText = document.createTextNode(move);
+            const moveSpan = document.createElement('span');
+            moveSpan.appendChild(moveText);
+            moveElement.appendChild(moveSpan);
+            moveElement.classList.add('bg-dark');
+            moveContainer.appendChild(moveElement);
+        }
+    }
+
+    document.querySelector('#chat-message-submit').onclick = function(e){
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        const userName = JSON.parse(document.getElementById('username').textContent);
+        socket.send(JSON.stringify({
+            'type': 'messaggio',
+            'message': message,
+            'username': userName
+        }));
+        messageInputDom.value = '';
+    }
+
+    document.querySelector('#quit-btn').onclick = function(e){
+        const userName = JSON.parse(document.getElementById('username').textContent);
+        if(socket){
+            socket.send(JSON.stringify({
+            'username': userName,
+            'type': 'abbandona'
+            }))
+        }
+    }
+
+    //per ora commentata per avere le modifiche del tasto abbandona
+    /*$(document).ready(function () {
+      $('#modalePromozione').modal('hide');
+            $("#myInput").on("click", function () {
+                $('#modaleAbbandono').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            });
+        }); */
+</script>
+{% endblock %}
