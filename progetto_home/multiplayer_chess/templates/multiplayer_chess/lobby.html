@@ -18,7 +18,7 @@
 
         if (data['type'] === 'match_found') {
             // redirect the user to another page
-            window.location.href = 'http://localhost:8000/' + encodeURIComponent(data['mode']) + '/' + encodeURIComponent(data['message']);
+            window.location.href = 'http://localhost/' + encodeURIComponent(data['mode']) + '/' + encodeURIComponent(data['message']);
         }
     });
 </script>

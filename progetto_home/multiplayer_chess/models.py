@@ -184,9 +184,9 @@ class Game(models.Model):
         ('finished','Partita terminata')
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='created')
-    elo_partita = models.IntegerField(null=True)
+    elo_partita = models.IntegerField(null=True, blank=True)
     bracket_position = models.CharField(max_length=4, default = "", blank=True, null=True)
-    numero_torneo = models.IntegerField(null=True)
+    numero_torneo = models.IntegerField(null=True, blank=True)
     
     class Meta: #modifico il comportamento del modello
         ordering = ['-data_partita'] #ordino per data (il meno sepcifica l'ordine decrescente)
