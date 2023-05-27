@@ -6,19 +6,17 @@ function onDragStart (source, piece, position, orientation) {
 }
 
 //funzione timer - DA TESTARE
-var boolTimer = true; //se è a true, significa che il timer selezionato è timer1, altrimenti è timer2
-minutiTimer1 = 3;
-secondiTimer1 = 0;
-minutiTimer2 = 3;
-secondiTimer2 = 0;
-var order = JSON.parse(document.getElementById('ordine').textContent);
+let boolTimer = true; //se è a true, significa che il timer selezionato è timer1, altrimenti è timer2
+let minutiTimer1 = 3;
+let secondiTimer1 = 0;
+let minutiTimer2 = 3;
+let secondiTimer2 = 0;
+let order = JSON.parse(document.getElementById('ordine').textContent);
 
 function countDown(Timer) {
   if (secondiTimer1 || minutiTimer1 && secondiTimer2 || minutiTimer2) {
     setTimeout(countDown, 1000);
   }
-  var timer1 = document.getElementById("timer");
-  var timer2 = document.getElementById("timer2");
   if (Timer) {
     secondiTimer1 -= 1;
     if (secondiTimer1 < 0) {
@@ -38,8 +36,7 @@ countDown(boolTimer);
 
 function onDrop (source, target, piece, newPos, oldPos, orientation, boolTimer) {
     if((target[1] === '8' && piece == 'wP') || (target[1] === '1' && piece === 'bP')){
-      //$('#modalePromozione').modal('show');
-        prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
+        let prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la donna, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
         send_move(source, target, prom)
     }
     send_move(source, target, "");
@@ -111,11 +108,6 @@ fetch("get_position/").then(response => response.json()).then(data => {
     board = ChessBoard('myBoard', config);
 }).catch(error => console.error(error));
 
-/*
-config.position = 'start'
-board = ChessBoard('myBoard', config);
-*/
-
 let game_status = "";
 let count = 1;
 
@@ -140,7 +132,7 @@ function message_receive(data){
     if (data.type === "connection_established") {
         return;
     }
-    var div = document.createElement("div");
+    let div = document.createElement("div");
     div.innerHTML = data.username + ": " + data.message;
     document.querySelector('#chat-message-container').appendChild(div);
 }

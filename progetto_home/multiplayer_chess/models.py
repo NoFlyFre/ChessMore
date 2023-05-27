@@ -32,7 +32,6 @@ class RunScheduleStart(threading.Thread):
             is_killed = self._kill.wait(self._interval)
             if is_killed:
                 break
-        print("Killing Thread")
 
     def kill(self):
         self._kill.set()
@@ -59,8 +58,6 @@ class RunScheduleOttavi(threading.Thread):
             if is_killed:
                 break 
 
-        print("Killing Thread")
-
     def kill(self):
         self._kill.set()
 
@@ -85,8 +82,6 @@ class RunScheduleQuarti(threading.Thread):
             if is_killed:
                 break 
 
-        print("Killing Thread")
-
     def kill(self):
         self._kill.set()
 
@@ -109,9 +104,7 @@ class RunScheduleSemifinali(threading.Thread):
 
             is_killed = self._kill.wait(self._interval)
             if is_killed:
-                break 
-
-        print("Killing Thread")
+                break
 
     def kill(self):
         self._kill.set()
@@ -136,8 +129,6 @@ class RunScheduleFinale(threading.Thread):
             is_killed = self._kill.wait(self._interval)
             if is_killed:
                 break 
-
-        print("Killing Thread")
 
     def kill(self):
         self._kill.set()

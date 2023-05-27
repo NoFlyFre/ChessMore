@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import *
+from .models import Game, Profile, ChessTournament
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -9,7 +9,6 @@ class ProfileAdmin(admin.ModelAdmin):
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
     ordering = ('-room_id',)
-
 
 
 admin.site.register(ChessTournament)
