@@ -12,6 +12,7 @@ import datetime
 from django.contrib.auth.models import User
 from django.db .models import Max
 import random
+import secrets
 
 scheduler_thread = None
 
@@ -239,9 +240,9 @@ def crea_partite_ottavi(instance):
         
         max_id = Game.objects.aggregate(Max('room_id'))['room_id__max']
 
-        player1 = random.choice(player_list)
+        player1 = secrets.choice(player_list)
         player_list.remove(player1)
-        player2 = random.choice(player_list)
+        player2 = secrets.choice(player_list)
         player_list.remove(player2)
 
         game = Game.objects.create(

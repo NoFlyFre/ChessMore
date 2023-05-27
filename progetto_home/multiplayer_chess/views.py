@@ -13,12 +13,16 @@ from django.urls import reverse
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+@require_GET
 def index(request):
     if request.user.is_authenticated:
         return redirect('multiplayer_chess:home')
     return redirect('multiplayer_chess:login')
 
+
+@require_http_methods(['GET', 'POST'])
 def loginView(request):
     if request.method == "POST":
         form = LoginForm(request, data=request.POST)
@@ -34,11 +38,13 @@ def loginView(request):
     form = LoginForm()
     return render(request=request, template_name="multiplayer_chess/login.html", context={"login_form": form})
 
+@require_GET
 def logoutView(request):
     logout(request)
     messages.success(request, "hai eseguito il log-out con successo.")
     return redirect("multiplayer_chess:login")
 
+@require_http_methods(['GET', 'POST'])
 def registerView(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -54,7 +60,7 @@ def registerView(request):
     form = RegisterForm()
     return render(request=request, template_name="multiplayer_chess/register.html", context={"register_form": form})
 
-
+@require_GET
 @cache_control(no_cache=True, max_age=1)
 def home(request):  
     if request.user.is_authenticated:
@@ -80,6 +86,7 @@ def home(request):
     else:
         return redirect("multiplayer_chess:login")
 
+@require_http_methods(['GET', 'POST'])
 @login_required(login_url='/login')
 def edit(request):
     if request.method == 'POST':
@@ -96,6 +103,8 @@ def edit(request):
         profile_form = ProfileEditForm(instance=request.user.profile)
     return render(request, 'multiplayer_chess/edit.html', context={'user_form': user_form, 'profile_form': profile_form})
 
+
+@require_http_methods(['GET', 'POST'])
 @login_required(login_url='/login')
 def my_password_change_view(request):
     if request.method == 'POST':
@@ -110,6 +119,7 @@ def my_password_change_view(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
 
+@require_GET
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
 def lobby(request, mode):
@@ -137,6 +147,7 @@ def lobby(request, mode):
         return redirect('/home/')
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
+@require_GET
 @login_required(login_url='/login')
 def cronologia(request):
     username = request.user
@@ -148,6 +159,7 @@ def cronologia(request):
     return render(request, "multiplayer_chess/cronologia.html", ctx)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
+@require_GET
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
 def chess_game(request, room_number, variant):
@@ -221,7 +233,7 @@ def chess_game(request, room_number, variant):
     }
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
 
-
+@require_GET
 def get_position(request, variant, room_number):
     # Get the position here
     game = Game.objects.get(pk=room_number)
@@ -231,7 +243,7 @@ def get_position(request, variant, room_number):
     response_data = json.dumps(position)
     return HttpResponse(response_data, content_type='application/json')
 
-
+@require_GET
 def tournament_list(request):
     all_tournaments = ChessTournament.objects.all()
     tournament_list = []
@@ -248,6 +260,7 @@ def tournament_list(request):
         tournament_list.append(tournament_dict)
     return render(request, template_name="multiplayer_chess/tournament_list.html", context={'tournaments': tournament_list})
 
+@require_GET
 def tournament_unsubscribe(request, tour_id):
     tournament = ChessTournament.objects.get(pk=tour_id)
     if tournament.status != 'iscrizione':
@@ -257,6 +270,7 @@ def tournament_unsubscribe(request, tour_id):
     tournament.players.remove(player)
     return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
 
+@require_GET
 def tournament_subscribe(request, tour_id):
     tournament = ChessTournament.objects.get(pk=tour_id)
     if tournament.status != 'iscrizione':
@@ -266,6 +280,7 @@ def tournament_subscribe(request, tour_id):
     tournament.players.add(player)
     return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
 
+@require_GET
 def leaderboard(request):
     profiles = Profile.objects.all()
     player = Profile.objects.get(user=request.user)
@@ -305,8 +320,7 @@ def leaderboard(request):
     return render(request, template_name="multiplayer_chess/leaderboard.html", context=context)
 
 
-
-
+@require_GET
 def tournament_details(request, tour_id):
 
     tournament = ChessTournament.objects.get(pk=tour_id)
