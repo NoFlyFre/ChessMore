@@ -4,8 +4,8 @@ from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
 from django.http import HttpResponse
-from .forms import *
-from .models import *
+from .forms import LoginForm, RegisterForm, UserEditForm, ProfileEditForm, CustomPasswordChangeForm
+from .models import Profile, Game, ChessTournament
 from .filters import FilterCronologia
 import json
 import re
@@ -15,15 +15,22 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+
+LOGIN_PATH = 'multiplayer_chess:login'
+HOME_PATH = 'multiplayer_chess:home'
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+TOURNAMENT_DETAILS_PATH = 'multiplayer_chess:tournament_details'
+
+
 @require_GET
 def index(request):
     if request.user.is_authenticated:
-        return redirect('multiplayer_chess:home')
-    return redirect('multiplayer_chess:login')
+        return redirect(HOME_PATH)
+    return redirect(LOGIN_PATH)
 
 
 @require_http_methods(['GET', 'POST'])
-def loginView(request):
+def login_view(request):
     if request.method == "POST":
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
@@ -32,27 +39,27 @@ def loginView(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("multiplayer_chess:home")
+                return redirect(HOME_PATH)
         else:
             messages.error(request, "username o password errati; riprovare.")
     form = LoginForm()
     return render(request=request, template_name="multiplayer_chess/login.html", context={"login_form": form})
 
 @require_GET
-def logoutView(request):
+def logout_view(request):
     logout(request)
     messages.success(request, "hai eseguito il log-out con successo.")
-    return redirect("multiplayer_chess:login")
+    return redirect(LOGIN_PATH)
 
 @require_http_methods(['GET', 'POST'])
-def registerView(request):
+def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             Profile.objects.create(user=user)
             messages.success(request, "registrazione avvenuta con successo; adesso, acceda al suo profilo.")
-            return redirect("multiplayer_chess:login")
+            return redirect(LOGIN_PATH)
         else:
             html_error = form.errors.as_text()
             new_html_error = re.sub(r'\*[^*]+\*', '', html_error).strip()
@@ -82,9 +89,9 @@ def home(request):
             login(request, user)
             return render(request=request, template_name='multiplayer_chess/home.html')
         else:
-            return redirect("multiplayer_chess:login")
+            return redirect(LOGIN_PATH)
     else:
-        return redirect("multiplayer_chess:login")
+        return redirect(LOGIN_PATH)
 
 @require_http_methods(['GET', 'POST'])
 @login_required(login_url='/login')
@@ -96,7 +103,7 @@ def edit(request):
             user_form.save()
             profile_form.save()
             messages.success(request, "profilo modificato con successo.")
-        except Exception as e:
+        except Exception:
             messages.error(request, "qualcosa è andato storto durante la modifica; riprovare.")
     else:
         user_form = UserEditForm(instance=request.user)
@@ -112,7 +119,7 @@ def my_password_change_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Password modificata con successo, è necessario riautenticarsi.")
-            return redirect('/login/')
+            return redirect(LOGIN_PATH)
         else:
             messages.error(request, "qualcosa è andato storto durante la modifica; riprovare.")
     else:
@@ -138,13 +145,13 @@ def lobby(request, mode):
                 Clicca <a href="{}">qui</a> per continuare la tua partita.' \
                 .format(reverse_lazy('multiplayer_chess:chess_game', args=[partita.mode, partita.room_id])))
             )
-        return redirect('/home/')
+        return redirect(HOME_PATH)
 
 
     modes = ('classic', 'atomic', 'antichess', 'kingofthehill', 'threecheck', 'horde', 'racingkings')
     if mode not in modes:
         messages.error(request, "Variante non disponibile")
-        return redirect('/home/')
+        return redirect(HOME_PATH)
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
 @require_GET
@@ -159,6 +166,7 @@ def cronologia(request):
     return render(request, "multiplayer_chess/cronologia.html", ctx)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
+
 @require_GET
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
@@ -167,57 +175,36 @@ def chess_game(request, room_number, variant):
     games = Game.objects.filter(room_id=room_number)
     game = games.first()
     user = request.user
-    if game.player1 != user and game.player2 != user:
-        messages.error(request, "Non fai parte di questa lobby")
-        return redirect('/home/')
+
     if game.status == 'finished':
         messages.error(request, "La partita è terminata")
-        return redirect('/home/')
+        return redirect(HOME_PATH)
+    
+
+    if user not in [game.player1, game.player2]:
+        messages.error(request, "Non fai parte di questa lobby")
+        return redirect(HOME_PATH)
+    
     
     order = 1 if game.player1 == user else 2
 
     profiles1 = Profile.objects.filter(user_id=game.player1)
     profiles2 = Profile.objects.filter(user_id=game.player2)
-    elo_player1 = 0
-    elo_player2 = 0
+
+    profile1 = profiles1.first()
+    username1 = game.player1.username
+    profile2 = profiles2.first()
+    username2 = game.player2.username
+
     if order == 1:
-        profile1 = profiles1.first()
-        username1 = game.player1.username
-        if variant == 'classic':
-            elo_player1 = profile1.elo_classic
-        elif variant == 'atomic':
-            elo_player1 = profile1.elo_atomic
-        elif variant == 'antichess':
-            elo_player1 = profile1.elo_antichess
-
-        profile2 = profiles2.first()
-        username2 = game.player2.username
-        if variant == 'classic':
-            elo_player2 = profile2.elo_classic
-        elif variant == 'atomic':
-            elo_player2 = profile2.elo_atomic
-        elif variant == 'antichess':
-            elo_player2 = profile2.elo_antichess
-
+        elo_player1 = getattr(profile1, f"elo_{variant}", 0)
+        elo_player2 = getattr(profile2, f"elo_{variant}", 0)
     else:
-        profile1 = profiles2.first()
-        username1 = game.player2.username
-        if variant == 'classic':
-            elo_player1 = profile1.elo_classic
-        elif variant == 'atomic':
-            elo_player1 = profile1.elo_atomic
-        elif variant == 'antichess':
-            elo_player1 = profile1.elo_antichess
-
-        profile2 = profiles1.first()
-        username2 = game.player1.username
-        if variant == 'classic':
-            elo_player2 = profile2.elo_classic
-        elif variant == 'atomic':
-            elo_player2 = profile2.elo_atomic
-        elif variant == 'antichess':
-            elo_player2 = profile2.elo_antichess
-
+        elo_player1 = getattr(profile2, f"elo_{variant}", 0)
+        elo_player2 = getattr(profile1, f"elo_{variant}", 0)
+        #scambio le 4 variabili tra di loro
+        profile2 , profile1 = profile1 , profile2
+        username2 , username1 = username1, username2
         
     ctx = {
         "title" : "Partita scacchi",
@@ -251,9 +238,9 @@ def tournament_list(request):
         tournament_dict = {
             'id': tournament.pk,
             'name': tournament.name,
-            'start_date': tournament.start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_date': tournament.end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-            'players': tournament.players.count(),
+            'start_date': tournament.start_datetime.strftime(DATE_FORMAT),
+            'end_date': tournament.end_datetime.strftime(DATE_FORMAT),
+            'players': tournament.players.count(),  
             'variante': tournament.mode,
             'tier': tournament.tier
         }
@@ -265,20 +252,20 @@ def tournament_unsubscribe(request, tour_id):
     tournament = ChessTournament.objects.get(pk=tour_id)
     if tournament.status != 'iscrizione':
         messages.error(request, "Iscrizioni chiuse")
-        return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
+        return redirect(reverse(TOURNAMENT_DETAILS_PATH, kwargs={'tour_id': tour_id}))
     player = Profile.objects.get(user=request.user)
     tournament.players.remove(player)
-    return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
+    return redirect(reverse(TOURNAMENT_DETAILS_PATH, kwargs={'tour_id': tour_id}))
 
 @require_GET
 def tournament_subscribe(request, tour_id):
     tournament = ChessTournament.objects.get(pk=tour_id)
     if tournament.status != 'iscrizione':
         messages.error(request, "Iscrizioni chiuse")
-        return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
+        return redirect(reverse(TOURNAMENT_DETAILS_PATH, kwargs={'tour_id': tour_id}))
     player = Profile.objects.get(user=request.user)
     tournament.players.add(player)
-    return redirect(reverse('multiplayer_chess:tournament_details', kwargs={'tour_id': tour_id}))
+    return redirect(reverse(TOURNAMENT_DETAILS_PATH, kwargs={'tour_id': tour_id}))
 
 @require_GET
 def leaderboard(request):
@@ -330,14 +317,8 @@ def tournament_details(request, tour_id):
 
     matches = tournament.matches.all()
 
-    if tournament.status == 'ottavi':
-        bracket = "A"
-    elif tournament.status == 'quarti':
-        bracket = "B"
-    elif tournament.status == 'semifinale':
-        bracket = "C"
-    elif tournament.status == 'finale':
-        bracket = "D"
+    bracket_positions = {'ottavi': "A", 'quarti': "B", 'semifinale': "C", 'finale': "D"}
+    bracket = bracket_positions.get(tournament.status)
     
     room_id = 0
     if tournament.status != 'iscrizione' and request.user.username in players:
@@ -363,17 +344,14 @@ def tournament_details(request, tour_id):
     tournament_dict = {
         'id': tournament.pk,
         'name': tournament.name,
-        'start_date': tournament.start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-        'end_date': tournament.end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+        'start_date': tournament.start_datetime.strftime(DATE_FORMAT),
+        'end_date': tournament.end_datetime.strftime(DATE_FORMAT),
         'players': players,
         'matches': tournament.matches
         #'players_list': players_json
     }
 
-    if request.user.username in players:
-        iscritto = True
-    else:
-        iscritto = False
+    iscritto = request.user.username in players
 
     context={
         'tournament_data': tournament_dict ,

@@ -9,8 +9,6 @@ def __init__(self, *args, **kwargs):
         )
 
 class FilterCronologia(django_filters.FilterSet):
-    #end_date = DateFilter(field_name='data_partita', lookup_expr='lte')
-    #data = CharFilter(field_name='data_partita')
     player1 = CharFilter(field_name='player1__username', lookup_expr='icontains')
     player2 = CharFilter(field_name='player2__username', lookup_expr='icontains')
     mode = ChoiceFilter(choices=Game.MODE_CHOICES)
