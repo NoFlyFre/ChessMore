@@ -137,7 +137,7 @@ class Lobby(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     "type": "chat_message",
-                    "message": f"Hello, everyone!",
+                    "message": "Hello, everyone!",
                 }
             )       
 
@@ -231,16 +231,10 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         if game.winner is not None:
             return
 
-        if quit_player == game.player1.username:
+        if (quit_player == game.player1.username) or (quit_player is None and turn == 'b'):
             loser = game.player1
             winner = game.player2
-        elif quit_player == game.player2.username:
-            loser = game.player2
-            winner = game.player1
-        elif quit_player is None and turn == 'b':
-            loser = game.player1
-            winner = game.player2
-        elif quit_player is None and turn == 'w':
+        elif (quit_player == game.player2.username) or (quit_player is None and turn == 'w'):
             loser = game.player2
             winner = game.player1
         else:
@@ -405,4 +399,4 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             "type": message_type,
             "message": "connessione al socket avvenuta con successo",
         }))
-
+        
