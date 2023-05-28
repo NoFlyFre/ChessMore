@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
-from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods
 
 
 LOGIN_PATH = 'multiplayer_chess:login'

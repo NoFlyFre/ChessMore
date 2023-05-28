@@ -12,6 +12,7 @@ from channels.testing import WebsocketCommunicator
 from project_chess.consumers import Lobby
 from asgiref.sync import sync_to_async
 from multiplayer_chess.views import HOME_PATH, LOGIN_PATH
+from . import game_logic
 
 STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 TESTING_EMAIL_1 = 'testuser2@example.com'
@@ -202,7 +203,6 @@ class UserAccountAndProfileCreateTests(TestCase):
 
     def test_profile_method(self):
         self.assertEqual(self.profile.__str__(), f'Profile of {self.user.username}')
-
 
 ################################
 ##          test form         ##
@@ -711,4 +711,108 @@ class MyLobbyTestCase(TestCase):
         await self._test_two_users('classic')
         await self._test_two_users('atomic')
 
+#######################################
+##          modulo game logic        ##
+#######################################
 
+class TestGameLogic(TestCase):
+
+    def test_new_game_standard_board(self):
+        id = 1
+        variant = "standard"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.Board), "game must be an instance of chess.Board"
+
+    def test_new_game_atomic_board(self):
+        id = 2
+        variant = "atomic"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.variant.AtomicBoard), "game must be an instance of AtomicBoard"
+
+    def test_new_game_antichess_board(self):
+        id = 3
+        variant = "antichess"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.variant.AntichessBoard), "game must be an instance of AtomicBoard"
+    
+
+    def test_new_game_king_of_the_hill_board(self):
+        id = 4
+        variant = "kingofthehill"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.variant.KingOfTheHillBoard), "game must be an instance of KingOfTheHillBoard"
+
+
+    def test_new_game_three_check_board(self):
+        id = 5
+        variant = "threecheck"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.variant.ThreeCheckBoard), "game must be an instance of ThreeCheckBoard"
+
+
+    def test_new_game_horde_board(self):
+        id = 6
+        variant = "horde"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.variant.HordeBoard), "game must be an instance of HordeBoard"
+
+
+    def test_new_racing_kings_board(self):
+        id = 7
+        variant = "racingkings"
+        parametro_fen = None
+
+        game_logic.new_game(id, variant, parametro_fen)
+        assert isinstance(game_logic.games[id], game_logic.chess.variant.RacingKingsBoard), "game must be an instance of RacingKingsBoard"
+
+    def test_insert_move(self):
+        game_logic.new_game(1, "standard", game_logic.chess.STARTING_FEN)
+        
+        result = game_logic.insert_move(1, "e2e4")
+        assert result == "success"
+        assert game_logic.games[1].fen() == "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        
+        result = game_logic.insert_move(1, "invalidmove")
+        assert result == "error"
+        assert game_logic.games[1].fen() == "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+
+
+    def test_status(self):
+        # crea una partita in stato scacco-matto
+        game_logic.new_game(1, "standard", "rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3")
+        assert game_logic.status(1) == "checkmate"
+        
+        # crea una partita in stato stale-mate
+        game_logic.new_game(2, "standard", "8/8/2q5/k3K3/6q1/8/2r2n2/7r w - - 28 53")
+        assert game_logic.status(2) == "stalemate"
+        
+        # crea una partita in stato di pareggio per una variante
+        game_logic.new_game(4, "atomic", "rn4nr/pp4pp/8/8/8/3p4/PP3PPP/RNB1KBNR b KQ - 0 9")
+        assert game_logic.status(4) == "var_loss"
+
+        # crea una partita in stato ongoing, ossia ancora in corso
+        game_logic.new_game(5, "standard", game_logic.chess.STARTING_FEN)
+        assert game_logic.status(5) is None
+
+    def test_turn(self):
+
+        game_logic.new_game(1, "standard" , game_logic.chess.STARTING_FEN)
+        self.assertEqual(game_logic.turn(1), "w")
+
+        # fai una mossa con il bianco
+        game_logic.insert_move(1, "e2e4")
+
+        # fai una mossa con il nero
+        self.assertEqual(game_logic.turn(1), "b")
