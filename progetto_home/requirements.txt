@@ -74,3 +74,4 @@ whitenoise==6.4.0
 zope.event==4.6
 zope.interface==5.5.2
 schedule
+coverage

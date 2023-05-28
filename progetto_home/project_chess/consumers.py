@@ -98,7 +98,6 @@ class Lobby(AsyncWebsocketConsumer):
             )
 
             self.rounded_elo = await sync_to_async(self.my_sync_get_elo_mode)(self.mode)
-            print('Self rounded ELO: ', self.rounded_elo)
 
             #ricava gli utenti nella lobby in attesa per una determinata variante e con un determinato elo
             users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
@@ -181,21 +180,21 @@ class Lobby(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
-        type = event["type"]
+        message_type = event["type"]
         message = event["message"]
         # Send the message to the WebSocket
         await self.send(text_data=json.dumps({
-            "type": type,
+            "type": message_type,
             "message": message,
         }))
 
     async def match_found(self, event):
-        type = event["type"]
+        message_type = event["type"]
         message = event["message"]
         mode = event["mode"]
         # Send the message to the WebSocket
         await self.send(text_data=json.dumps({
-            "type": type,
+            "type": message_type,
             "message" : message,
             "mode" : mode
         }))
@@ -225,112 +224,47 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         game = games.first()
         return game.fen
 
-    '''
-    def my_sync_save_winner(self, turn, quitPlayer):
+    def my_sync_save_winner(self, turn, quit_player):
         games = Game.objects.filter(pk=self.room_name)
         game = games.first()
-        profile_player1 = Profile.objects.get(user=game.player1)
-        profile_player2 = Profile.objects.get(user=game.player2)
-        print(profile_player1.elo_classic)
-        print(profile_player2.elo_classic)
-
-        if quitPlayer == None:
-            if turn == 'w' :
-                game.winner = game.player2
-                if game.mode == 'classic':
-                    profile_player1.elo_classic -= 7
-                    profile_player2.elo_classic += 7
-                elif game.mode == 'atomic':
-                    profile_player1.elo_atomic -= 7
-                    profile_player2.elo_atomic += 7
-                elif game.mode == 'antichess':
-                    profile_player1.elo_antichess -= 7
-                    profile_player2.elo_antichess += 7
-            else:
-                game.winner = game.player1
-                if game.mode == 'classic':
-                    profile_player1.elo_classic += 7
-                    profile_player2.elo_classic -= 7
-                elif game.mode == 'atomic':
-                    profile_player1.elo_atomic += 7
-                    profile_player2.elo_atomic -= 7
-                elif game.mode == 'antichess':
-                    profile_player1.elo_antichess += 7
-                    profile_player2.elo_antichess -= 7
-            profile_player2.save()
-            profile_player1.save()
-        else:
-            if(quitPlayer == game.player1):
-                game.winner = game.player2
-            else:
-                game.winner = game.player1
-    
-        game.status = 'finished'
-        #print(game.winner)
-        game.save()
         
-        profile_player2.save()
+        if game.winner is not None:
+            return
+
+        if quit_player == game.player1.username:
+            loser = game.player1
+            winner = game.player2
+        elif quit_player == game.player2.username:
+            loser = game.player2
+            winner = game.player1
+        elif quit_player is None and turn == 'b':
+            loser = game.player1
+            winner = game.player2
+        elif quit_player is None and turn == 'w':
+            loser = game.player2
+            winner = game.player1
+        else:
+            return
+
+        game.winner = winner
+        if game.mode == 'classic':
+            elo_field = 'elo_classic'
+        elif game.mode == 'atomic':
+            elo_field = 'elo_atomic'
+        elif game.mode == 'antichess':
+            elo_field = 'elo_antichess'
+
+        profile_player1 = Profile.objects.get(user=winner)
+        profile_player2 = Profile.objects.get(user=loser)
+
+        setattr(profile_player1, elo_field, getattr(profile_player1, elo_field) + 7)
+        setattr(profile_player2, elo_field, getattr(profile_player2, elo_field) - 7)
+        
         profile_player1.save()
-    '''
-    
-    def my_sync_save_winner(self, turn, quitPlayer):
-        games = Game.objects.filter(pk=self.room_name)
-        game = games.first()
-        profile_player1 = Profile.objects.get(user=game.player1)
-        profile_player2 = Profile.objects.get(user=game.player2)
+        profile_player2.save()
 
-        if game.winner is None:
-            if quitPlayer == game.player1.username:
-                game.winner = game.player2
-                if game.mode == 'classic':
-                    profile_player1.elo_classic -= 7
-                    profile_player2.elo_classic += 7
-                elif game.mode == 'atomic':
-                    profile_player1.elo_atomic -= 7
-                    profile_player2.elo_atomic += 7
-                elif game.mode == 'antichess':
-                    profile_player1.elo_antichess -= 7
-                    profile_player2.elo_antichess += 7
-            elif quitPlayer == game.player2.username:
-                game.winner = game.player1
-                if game.mode == 'classic':
-                    profile_player2.elo_classic -= 7
-                    profile_player1.elo_classic += 7
-                elif game.mode == 'atomic':
-                    profile_player2.elo_atomic -= 7
-                    profile_player1.elo_atomic += 7
-                elif game.mode == 'antichess':
-                    profile_player2.elo_antichess -= 7
-                    profile_player1.elo_antichess += 7
-            elif quitPlayer is None and turn == 'b':
-                game.winner = game.player1
-                if game.mode == 'classic':
-                    profile_player2.elo_classic -= 7
-                    profile_player1.elo_classic += 7
-                elif game.mode == 'atomic':
-                    profile_player2.elo_atomic -= 7
-                    profile_player1.elo_atomic += 7
-                elif game.mode == 'antichess':
-                    profile_player2.elo_antichess -= 7
-                    profile_player1.elo_antichess += 7
-            elif quitPlayer is None and turn == 'w':
-                game.winner = game.player2
-                if game.mode == 'classic':
-                    profile_player1.elo_classic -= 7
-                    profile_player2.elo_classic += 7
-                elif game.mode == 'atomic':
-                    profile_player1.elo_atomic -= 7
-                    profile_player2.elo_atomic += 7
-                elif game.mode == 'antichess':
-                    profile_player1.elo_antichess -= 7
-                    profile_player2.elo_antichess += 7
-
-            profile_player2.save()
-            profile_player1.save()
-
-            game.status = 'finished'
-            #print(game.winner)
-            game.save()
+        game.status = 'finished'
+        game.save()
         
     def my_sync_save_draw(self):
         games = Game.objects.filter(pk=self.room_name)
@@ -376,25 +310,19 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         players = await sync_to_async(self.obtain_players)(self.room_name)
 
         if(text_data_json['type'] == 'game_move'):
-
             san = game_logic.last_move(self.room_name, text_data_json['move'])
             result = game_logic.insert_move(self.room_name, text_data_json['move'])
             fen = game_logic.fen(self.room_name)
             status = game_logic.status(self.room_name)
             turn = game_logic.turn(self.room_name)
-            if status == "checkmate":
-                await sync_to_async(self.my_sync_save_winner)(turn, None)
-            if status == "stalemate" or status == "var_draw" or status == "insufficient":
-                await sync_to_async(self.my_sync_save_draw)()
-            if status == "var_loss":
-                if turn == 'w':
-                    await sync_to_async(self.my_sync_save_winner)('b')
-                else:
-                    await sync_to_async(self.my_sync_save_winner)(turn, None)
-            #
-            await sync_to_async(self.my_sync_save_fen_and_turn)(fen, turn)
-            #
 
+            if status in ["checkmate" , "var_loss"]:
+                await sync_to_async(self.my_sync_save_winner)(('b' if turn == 'w' else 'w'), None)
+            elif status == "stalemate" or status == "var_draw" or status == "insufficient":
+                await sync_to_async(self.my_sync_save_draw)()
+            
+            await sync_to_async(self.my_sync_save_fen_and_turn)(fen, turn)
+            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -432,8 +360,7 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             else:
                 print("Ha quittato il player: " + players['player2'])
                 await sync_to_async(self.my_sync_save_winner)('w', players['player2'])
-            
-            #await sync_to_async(players['game'].save)()
+
 
     async def game_move(self, event):
 
@@ -472,10 +399,10 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             'type': 'abbandona'
         }))
     async def connection_established(self, event):
-        type = event["type"]
+        message_type = event["type"]
         # Send the message to the WebSocket
         await self.send(text_data=json.dumps({
-            "type": type,
+            "type": message_type,
             "message": "connessione al socket avvenuta con successo",
         }))
 

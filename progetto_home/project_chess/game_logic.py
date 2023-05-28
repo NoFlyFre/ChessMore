@@ -54,6 +54,6 @@ def turn(id):
 def last_move(id, move):
     try:
         return games[id].san(chess.Move.from_uci(move))
-    except:
+    except Exception:
         return ""
 

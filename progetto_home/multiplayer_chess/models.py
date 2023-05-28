@@ -183,9 +183,10 @@ class Game(models.Model):
     class Meta: #modifico il comportamento del modello
         ordering = ['-data_partita'] #ordino per data (il meno sepcifica l'ordine decrescente)
 
+    '''
     def __str__(self):
         return f"{self.player1.username} vs {self.player2.username} - {self.bracket_position} - {self.numero_torneo} - winner: {self.winner}"
-    
+    '''
 
 
 class ChessTournament(models.Model):
