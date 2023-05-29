@@ -174,7 +174,7 @@
                 game_is_over("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2);
                 modify_quit_btn();
                 break;
-            case "var_loss":
+            case "var_win":
                 let winner3 = "bianchi"
                 if(turn === 'w')
                     winner3 = "neri"
@@ -358,15 +358,5 @@
             }))
         }
     }
-
-    //per ora commentata per avere le modifiche del tasto abbandona
-    /*$(document).ready(function () {
-      $('#modalePromozione').modal('hide');
-            $("#myInput").on("click", function () {
-                $('#modaleAbbandono').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-            });
-        }); */
 </script>
 {% endblock %}
