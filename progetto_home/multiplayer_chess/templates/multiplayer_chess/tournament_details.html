@@ -68,13 +68,19 @@
         {% endif %}
     </div>
 
-    {% if tournament_status != 'iscrizione' %}
+    {% if tournament_status != 'iscrizione'%}
         <div class="row mt-4">
             <div class="col">
                 <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary mb-2">Back to the list</a>
             </div>
             <div class="col">
                 <a href="{% url 'multiplayer_chess:chess_game' room_number=match_user_id variant=mode %}" role="button" class="btn btn-primary">Vai alla tua partita  {{match_user}}</a>
+            </div>
+        </div>
+    {% elif match_user_id == 0 %}
+        <div class="row mt-4">
+            <div class="col">
+                <a href="{% url 'multiplayer_chess:tournament_list'%}" role="button" class="btn btn-primary mb-2">Back to the list</a>
             </div>
         </div>
     {% else %}
