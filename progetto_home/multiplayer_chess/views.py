@@ -323,7 +323,8 @@ def tournament_details(request, tour_id):
     room_id = 0
     if tournament.status != 'iscrizione' and request.user.username in players:
         match_user = tournament.matches.filter(Q(player1=request.user) | Q(player2=request.user)).filter(bracket_position=bracket)
-        room_id = match_user.first().room_id
+        if match_user is not None:
+            room_id = match_user.first().room_id
     
     matches_ordered = sorted(matches, key=lambda game: game.numero_torneo, reverse=True)
 

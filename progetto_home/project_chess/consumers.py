@@ -247,15 +247,18 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             elo_field = 'elo_atomic'
         elif game.mode == 'antichess':
             elo_field = 'elo_antichess'
+        else:
+            elo_field = None
 
-        profile_player1 = Profile.objects.get(user=winner)
-        profile_player2 = Profile.objects.get(user=loser)
+        if elo_field is not None:
+            profile_player1 = Profile.objects.get(user=winner)
+            profile_player2 = Profile.objects.get(user=loser)
 
-        setattr(profile_player1, elo_field, getattr(profile_player1, elo_field) + 7)
-        setattr(profile_player2, elo_field, getattr(profile_player2, elo_field) - 7)
-        
-        profile_player1.save()
-        profile_player2.save()
+            setattr(profile_player1, elo_field, getattr(profile_player1, elo_field) + 7)
+            setattr(profile_player2, elo_field, getattr(profile_player2, elo_field) - 7)
+            
+            profile_player1.save()
+            profile_player2.save()
 
         game.status = 'finished'
         game.save()
