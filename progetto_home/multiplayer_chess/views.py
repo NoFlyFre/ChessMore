@@ -21,14 +21,14 @@ HOME_PATH = 'multiplayer_chess:home'
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 TOURNAMENT_DETAILS_PATH = 'multiplayer_chess:tournament_details'
 
-
+#OK
 @require_GET
 def index(request):
     if request.user.is_authenticated:
         return redirect(HOME_PATH)
     return redirect(LOGIN_PATH)
 
-
+#OK
 @require_http_methods(['GET', 'POST'])
 def login_view(request):
     if request.method == "POST":
@@ -45,12 +45,14 @@ def login_view(request):
     form = LoginForm()
     return render(request=request, template_name="multiplayer_chess/login.html", context={"login_form": form})
 
+#OK
 @require_GET
 def logout_view(request):
     logout(request)
     messages.success(request, "hai eseguito il log-out con successo.")
     return redirect(LOGIN_PATH)
 
+#OK
 @require_http_methods(['GET', 'POST'])
 def register_view(request):
     if request.method == 'POST':
@@ -67,6 +69,7 @@ def register_view(request):
     form = RegisterForm()
     return render(request=request, template_name="multiplayer_chess/register.html", context={"register_form": form})
 
+#OK
 @require_GET
 @cache_control(no_cache=True, max_age=1)
 def home(request):  
@@ -93,6 +96,7 @@ def home(request):
     else:
         return redirect(LOGIN_PATH)
 
+#OK
 @require_http_methods(['GET', 'POST'])
 @login_required(login_url='/login')
 def edit(request):
@@ -110,7 +114,7 @@ def edit(request):
         profile_form = ProfileEditForm(instance=request.user.profile)
     return render(request, 'multiplayer_chess/edit.html', context={'user_form': user_form, 'profile_form': profile_form})
 
-
+#OK
 @require_http_methods(['GET', 'POST'])
 @login_required(login_url='/login')
 def my_password_change_view(request):
@@ -126,6 +130,7 @@ def my_password_change_view(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'multiplayer_chess/password_change.html', {'form': form})
 
+#OK
 @require_GET
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
@@ -154,6 +159,7 @@ def lobby(request, mode):
         return redirect(HOME_PATH)
     return render(request, "multiplayer_chess/lobby.html" , {'mode': mode})
 
+#OK
 @require_GET
 @login_required(login_url='/login')
 def cronologia(request):
@@ -166,7 +172,7 @@ def cronologia(request):
     return render(request, "multiplayer_chess/cronologia.html", ctx)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
-
+#OK
 @require_GET
 @cache_control(no_cache=True)
 @login_required(login_url='/login')
@@ -176,16 +182,14 @@ def chess_game(request, room_number, variant):
     game = games.first()
     user = request.user
 
-    if game.status == 'finished':
-        messages.error(request, "La partita è terminata")
-        return redirect(HOME_PATH)
-    
-
     if user not in [game.player1, game.player2]:
         messages.error(request, "Non fai parte di questa lobby")
         return redirect(HOME_PATH)
     
-    
+    if game.status == 'finished':
+        messages.error(request, "La partita è terminata")
+        return redirect(HOME_PATH)
+        
     order = 1 if game.player1 == user else 2
 
     profiles1 = Profile.objects.filter(user_id=game.player1)
@@ -220,6 +224,7 @@ def chess_game(request, room_number, variant):
     }
     return render(request, template_name="multiplayer_chess/chess_game.html", context=ctx)
 
+#OK
 @require_GET
 def get_position(request, variant, room_number):
     # Get the position here
@@ -267,6 +272,7 @@ def tournament_subscribe(request, tour_id):
     tournament.players.add(player)
     return redirect(reverse(TOURNAMENT_DETAILS_PATH, kwargs={'tour_id': tour_id}))
 
+#OK
 @require_GET
 def leaderboard(request):
     profiles = Profile.objects.all()

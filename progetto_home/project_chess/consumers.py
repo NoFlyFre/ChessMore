@@ -8,8 +8,6 @@ import asyncio
 
 class Lobby(AsyncWebsocketConsumer):
 
-    lock = asyncio.Lock()
-
     connected_users = []
     
     firstConnection = {
