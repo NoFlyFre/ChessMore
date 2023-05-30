@@ -12,4 +12,4 @@ EXPOSE 8000
 RUN chown -R appuser:appuser /app
 USER appuser
 
-CMD ["python" , "manage.py" , "runserver" , "0.0.0.0:8000"]
+CMD ["./entrypoint.sh"]
