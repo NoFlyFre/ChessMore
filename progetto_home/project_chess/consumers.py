@@ -8,8 +8,6 @@ import asyncio
 
 class Lobby(AsyncWebsocketConsumer):
 
-    lock = asyncio.Lock()
-
     connected_users = []
     
     firstConnection = {
@@ -83,76 +81,76 @@ class Lobby(AsyncWebsocketConsumer):
 
     
     async def connect(self):
-        async with self.lock:
-            #dalla richiesta ricava l'utente e la modalità
-            user = self.scope['user']
-            self.mode = self.scope['url_route']['kwargs']['mode']
+        
+        #dalla richiesta ricava l'utente e la modalità
+        user = self.scope['user']
+        self.mode = self.scope['url_route']['kwargs']['mode']
 
-            #nome del gruppo
-            self.room_group_name = 'canali_lobby_' + self.mode
-            
-            #aggiunge il canale al gruppo
-            await self.channel_layer.group_add(
+        #nome del gruppo
+        self.room_group_name = 'canali_lobby_' + self.mode
+        
+        #aggiunge il canale al gruppo
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        self.rounded_elo = await sync_to_async(self.my_sync_get_elo_mode)(self.mode)
+
+        #ricava gli utenti nella lobby in attesa per una determinata variante e con un determinato elo
+        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
+
+        
+        #se l'utente non è gia connesso per quella determinata variante imposta il
+        #flag firstConnection a true
+        if user not in users_lobby_variant:
+            self.firstConnection[self.mode] = True
+        else:
+            self.firstConnection[self.mode] = False
+        
+        #aggiunge l'utente agli utenti in attesa per una determinata variante
+        self.connected_users.append((user, self.mode, self.rounded_elo ))
+
+        #riaggiorno la variabile (ora c'è un utente in più che è stato appena aggiunto)
+        users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
+
+        #ricava gli usernames degli utenti nella lobby in attesa per una determinata variante
+        usernames_lobby_variant = []
+        for user_lobby_variant in  users_lobby_variant:
+            usernames_lobby_variant.append(user_lobby_variant.username)
+        #rimuove le ripetizioni (ad. esempio lo stesso utente potrebbe avere due pagine aperte con la lobby)
+        usernames_lobby_variant_no_repetition = list(set(usernames_lobby_variant))
+        
+        await self.accept()
+
+        
+        if len(usernames_lobby_variant_no_repetition) == 1:
+
+            #evita che di creare infinite partite ogni volta che l'utente refresha la pagina
+            if self.firstConnection[self.mode]:
+                await sync_to_async(self.my_sync_crea_partita)(user, self.mode, self.rounded_elo)
+
+            #greetings message
+            await self.channel_layer.group_send(
                 self.room_group_name,
-                self.channel_name
+                {
+                    "type": "chat_message",
+                    "message": "Hello, everyone!",
+                }
+            )       
+
+        if len(usernames_lobby_variant_no_repetition) == 2:
+            #aggiunge il secondo giocatore alla partita
+            room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user, self.mode, self.rounded_elo)
+            #informa tutti coloro connessi al socket che la partita tra i due player sta per iniziare
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "match_found",
+                    "message": f"{room_id}",
+                    "mode": f"{self.mode}"
+                }
             )
-
-            self.rounded_elo = await sync_to_async(self.my_sync_get_elo_mode)(self.mode)
-
-            #ricava gli utenti nella lobby in attesa per una determinata variante e con un determinato elo
-            users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
-
-            
-            #se l'utente non è gia connesso per quella determinata variante imposta il
-            #flag firstConnection a true
-            if user not in users_lobby_variant:
-                self.firstConnection[self.mode] = True
-            else:
-                self.firstConnection[self.mode] = False
-            
-            #aggiunge l'utente agli utenti in attesa per una determinata variante
-            self.connected_users.append((user, self.mode, self.rounded_elo ))
-
-            #riaggiorno la variabile (ora c'è un utente in più che è stato appena aggiunto)
-            users_lobby_variant = [t[0] for t in self.connected_users if t[1] == self.mode and t[2] == self.rounded_elo]
-
-            #ricava gli usernames degli utenti nella lobby in attesa per una determinata variante
-            usernames_lobby_variant = []
-            for user_lobby_variant in  users_lobby_variant:
-                usernames_lobby_variant.append(user_lobby_variant.username)
-            #rimuove le ripetizioni (ad. esempio lo stesso utente potrebbe avere due pagine aperte con la lobby)
-            usernames_lobby_variant_no_repetition = list(set(usernames_lobby_variant))
-            
-            await self.accept()
-
-            
-            if len(usernames_lobby_variant_no_repetition) == 1:
-
-                #evita che di creare infinite partite ogni volta che l'utente refresha la pagina
-                if self.firstConnection[self.mode]:
-                    await sync_to_async(self.my_sync_crea_partita)(user, self.mode, self.rounded_elo)
-
-                #greetings message
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        "type": "chat_message",
-                        "message": f"Hello, everyone!",
-                    }
-                )       
-
-            if len(usernames_lobby_variant_no_repetition) == 2:
-                #aggiunge il secondo giocatore alla partita
-                room_id = await sync_to_async(self.my_sync_aggiungi_secondo_player)(user, self.mode, self.rounded_elo)
-                #informa tutti coloro connessi al socket che la partita tra i due player sta per iniziare
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        "type": "match_found",
-                        "message": f"{room_id}",
-                        "mode": f"{self.mode}"
-                    }
-                )
 
     async def disconnect(self, close_code):
 
@@ -231,16 +229,10 @@ class WSConsumerChess(AsyncWebsocketConsumer):
         if game.winner is not None:
             return
 
-        if quit_player == game.player1.username:
+        if (quit_player == game.player1.username) or (quit_player is None and turn == 'b'):
             loser = game.player1
             winner = game.player2
-        elif quit_player == game.player2.username:
-            loser = game.player2
-            winner = game.player1
-        elif quit_player is None and turn == 'b':
-            loser = game.player1
-            winner = game.player2
-        elif quit_player is None and turn == 'w':
+        elif (quit_player == game.player2.username) or (quit_player is None and turn == 'w'):
             loser = game.player2
             winner = game.player1
         else:
@@ -253,15 +245,18 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             elo_field = 'elo_atomic'
         elif game.mode == 'antichess':
             elo_field = 'elo_antichess'
+        else:
+            elo_field = None
 
-        profile_player1 = Profile.objects.get(user=winner)
-        profile_player2 = Profile.objects.get(user=loser)
+        if elo_field is not None:
+            profile_player1 = Profile.objects.get(user=winner)
+            profile_player2 = Profile.objects.get(user=loser)
 
-        setattr(profile_player1, elo_field, getattr(profile_player1, elo_field) + 7)
-        setattr(profile_player2, elo_field, getattr(profile_player2, elo_field) - 7)
-        
-        profile_player1.save()
-        profile_player2.save()
+            setattr(profile_player1, elo_field, getattr(profile_player1, elo_field) + 7)
+            setattr(profile_player2, elo_field, getattr(profile_player2, elo_field) - 7)
+            
+            profile_player1.save()
+            profile_player2.save()
 
         game.status = 'finished'
         game.save()
@@ -405,4 +400,4 @@ class WSConsumerChess(AsyncWebsocketConsumer):
             "type": message_type,
             "message": "connessione al socket avvenuta con successo",
         }))
-
+        

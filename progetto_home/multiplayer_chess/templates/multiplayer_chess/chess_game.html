@@ -134,8 +134,6 @@
           origine = source;
           fine = target;
           $('#modalePromozione').modal('show');
-          //prom = prompt("In quale pezzo vorresti promuovere il pedone?\nScrivi la lettera 'q' per la regina, 'n' per" + " il cavallo, 'b' per l'alfiere e 'r' per la torre");
-          //send_move(source, target, prom);
       }
       else {
         send_move(source, target, "");
@@ -149,25 +147,21 @@
                 let winner = "bianchi";
                 if(turn === 'w')
                     winner = "neri";
-                //alert("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
                 socket.close();
                 game_is_over("La partita è finita! Il vincitore è il giocatore con i pezzi " + winner);
                 modify_quit_btn();
                 break;
             case "stalemate":
-                //alert("La partita è finita in pareggio per stallo!");
                 socket.close();
                 game_is_over("La partita è finita in pareggio per stallo!");
                 modify_quit_btn();
                 break;
             case "insufficient":
-                //alert("La partita è finita in pareggio per posizione morta!");
                 socket.close();
                 game_is_over("La partita è finita in pareggio per posizione morta!");
                 modify_quit_btn();
                 break;
             case "var_draw":
-                //alert("La partita è finita in pareggio per una regola della variante!");
                 socket.close();
                 game_is_over("La partita è finita in pareggio per una regola della variante!");
                 modify_quit_btn();
@@ -176,11 +170,18 @@
                 let winner2 = "bianchi"
                 if(turn === 'w')
                     winner2 = "neri"
-                //alert("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2);
                 socket.close();
-                game_is_over("La partita è finita in pareggio per una regola della variante!");
+                game_is_over("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner2);
                 modify_quit_btn();
-                break;     
+                break;
+            case "var_win":
+                let winner3 = "bianchi"
+                if(turn === 'w')
+                    winner3 = "neri"
+                socket.close();
+                game_is_over("La partita è finita per una regola della variante! Il vincitore è il giocatore con i pezzi " + winner3);
+                modify_quit_btn();
+                break;        
         }
     }
 
@@ -357,15 +358,5 @@
             }))
         }
     }
-
-    //per ora commentata per avere le modifiche del tasto abbandona
-    /*$(document).ready(function () {
-      $('#modalePromozione').modal('hide');
-            $("#myInput").on("click", function () {
-                $('#modaleAbbandono').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-            });
-        }); */
 </script>
 {% endblock %}

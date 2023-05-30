@@ -43,6 +43,8 @@ def status(id):
         return "var_draw"
     elif games[id].is_variant_loss():
         return "var_loss"
+    elif games[id].is_variant_win():
+        return "var_win"
 
 
 def turn(id):
