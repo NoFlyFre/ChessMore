@@ -44,4 +44,4 @@ For any inquiries or further information, you can reach out to the team members 
 - Giovanni Cocchi: 228001@studenti.unimore.it
 - Francesco Caligiuri: 276621@studenti.unimore.it
 
-To play ChessMore, visit the following link: [http://progettochess2023g6.ddns.net/login]
+To play ChessMore, visit the following link: http://progettochess2023g6.ddns.net
